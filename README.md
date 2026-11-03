@@ -20,7 +20,9 @@ https://akanewton.github.io/shigang-maozhong-timeline/
 https://github.com/akanewton/shigang-maozhong-timeline/releases/latest
 
 下载后解压，用浏览器打开 `index.html`。  
-GitHub 打不开时，可以使用发布评论里提供的国内网盘备份。
+GitHub 打不开时，可以使用国内网盘备份：
+
+- 百度网盘：https://pan.baidu.com/s/1jX-PuXjXuu8wF3F4hc8QfQ?pwd=0721 提取码：0721
 
 ![界面预览](docs/preview.png)
 
