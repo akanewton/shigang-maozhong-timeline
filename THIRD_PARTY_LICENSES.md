@@ -73,13 +73,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## 7. 标准地图角标
+## 7. 标准地图链接
 
-- 文件：`standard_map_GS2019_1823.jpg`
-- 来源：自然资源部标准地图服务
-  - http://bzdt.ch.mnr.gov.cn/
-- 审图号：GS(2019)1823号
-- 获取时间：2026-11-03
-- 用途：页面右下角合规角标，完整展示中国地图（含南海诸岛附图），不裁切、不改边界，仅做整体 CSS 缩放。
-- 说明：该图版权/使用条件以自然资源部标准地图服务为准；公开传播前请再次核对该服务的最新使用条款，并保留审图号。该文件不属于本项目的 MIT 代码许可。
-
+- 本项目不再嵌入/再分发官方标准地图图片；
+- 页面右下角只提供自然资源部标准地图服务链接：
+  - https://bzdt.ch.mnr.gov.cn/
+- 页面声明：本项目中所有地图仅供学习使用，实际地图请以自然资源部官方地图为准。
+- 主交互地图仍是 DataV/CHGIS 历史教学示意底图，不是官方标准地图。
