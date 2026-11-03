@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>史纲 · 毛中特 时间轴（v7.27 公开版）</title>
+<title>史纲 · 毛中特 时间轴（v7.28 公开版）</title>
 <style>
   :root{ --bg1:#0a0e13; --bg2:#101823; --text:#e9f0f8; --muted:#8fa2b6; --line:#22303f; --accent:#7cc4ff; }
   *{box-sizing:border-box}
@@ -495,7 +495,7 @@
 <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <div id="topLeft">
-  <div id="title">史纲 · 毛中特 时间轴 <small>v7.27 公开版</small></div>
+  <div id="title">史纲 · 毛中特 时间轴 <small>v7.28 公开版</small></div>
   <button id="topToggle">隐藏边栏</button>
   <div id="controls">
     <button id="playBtn" class="pri">▶ 播放</button>
@@ -590,6 +590,7 @@
   <div class="fnTag">势力图 · 省界示意</div>
   <div class="fnTitle"></div>
   <div class="fnList"></div>
+  <div class="fnHint" id="tannuHint" style="display:none;line-height:1.35">唐努乌梁海：1914 后沙俄控制 · 1921 图瓦 · 1944 并入苏联</div>
 </div>
 <div id="factionTip"></div>
 <div id="taipingNote">
@@ -649,6 +650,7 @@
 <script src="mapdata.js"></script>
 <script src="qing_phases.js"></script>
 <script src="qing_provinces.js"></script>
+<script src="tannu_data.js"></script>
 <script src="layers.js"></script>
 <script src="kaodian.js"></script>
 <script>
@@ -1692,6 +1694,19 @@ function initMap(){
   }
   MAP.groups.chinaAll.appendChild(MAP.groups.highlights);
   if (MAP.groups.mongoliaHist) MAP.groups.chinaAll.appendChild(MAP.groups.mongoliaHist);
+  MAP.groups.tannuHist = svgEl('g', {id:'mapTannuHist'});
+  if (window.TANNU_URIANKHAI){
+    MAP.tannuHistPath = svgEl('path', {
+      d: polyPath(window.TANNU_URIANKHAI, cproj), fill:'#4f8fd9', 'fill-opacity':'.95',
+      stroke:'#d6e6f6', 'stroke-width':1, 'stroke-linejoin':'round',
+      'vector-effect':'non-scaling-stroke', opacity:'1'
+    });
+    const tt = svgEl('title', {});
+    tt.textContent = '唐努乌梁海：1914 年后沙俄控制，1921 图瓦，1944 并入苏联';
+    MAP.tannuHistPath.appendChild(tt);
+    MAP.groups.tannuHist.appendChild(MAP.tannuHistPath);
+  }
+  MAP.groups.chinaAll.appendChild(MAP.groups.tannuHist);
   MAP.highlightFlash = null;
 
   // 军阀割据图层（按省界近似）
@@ -2417,6 +2432,19 @@ function updateQingPhase(now){
   if (MAP.groups.mongoliaHist){
     MAP.groups.mongoliaHist.style.display = (activeTrack !== 'mao' && currentYear >= 1912 && currentYear < 1946) ? '' : 'none';
   }
+  const tannuOn = (activeTrack !== 'mao' && currentYear >= 1912 && currentYear < 1949);
+  if (MAP.groups.tannuHist){
+    MAP.groups.tannuHist.style.display = tannuOn ? '' : 'none';
+    if (tannuOn){
+      let tannuFill = '#4f8fd9';               // 1912–1914 中华民国名义
+      if (currentYear >= 1914 && currentYear < 1921) tannuFill = '#6b8fbf'; // 沙俄控制
+      else if (currentYear >= 1921 && currentYear < 1944) tannuFill = '#8a7fb0'; // 图瓦
+      else if (currentYear >= 1944) tannuFill = '#6b8fbf'; // 苏联
+      MAP.tannuHistPath.setAttribute('fill', tannuFill);
+    }
+  }
+  const tannuHint = document.getElementById('tannuHint');
+  if (tannuHint) tannuHint.style.display = tannuOn ? '' : 'none';
   // 1912–1949 民国时期换一种颜色，避免看起来一直是清朝
   const roc = (currentYear >= 1912 && currentYear < 1949);
   MAP.qingNowPath.setAttribute('fill', roc ? '#5b6f63' : QING_FILL);
