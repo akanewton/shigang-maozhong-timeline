@@ -5,6 +5,23 @@
 > 这是一个离线单文件夹 HTML 工具，不是官方产品，不是教材替代品。  
 > 考点内容为 AI 辅助二次整理，使用前请以 2027 考研政治大纲和最新版教材为准。
 
+## 在线使用
+
+**手机/电脑直接打开，不需要下载安装：**
+
+https://akanewton.github.io/shigang-maozhong-timeline/
+
+- 手机横屏体验更好；
+- 手机左下角“考点”打开历史任务抽屉；
+- 电脑端直接打开同一地址即可。
+
+## 下载离线版
+
+https://github.com/akanewton/shigang-maozhong-timeline/releases/latest
+
+下载后解压，用浏览器打开 `index.html`。  
+GitHub 打不开时，可以使用发布评论里提供的国内网盘备份。
+
 ![界面预览](docs/preview.png)
 
 ## 功能
