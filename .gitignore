@@ -1,0 +1,16 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# local temp / review artifacts
+_*
+*.zip
+审查包_*
+审查包_v*/
+发布版_*
+
+# logs
+*.log

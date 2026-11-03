@@ -1,0 +1,3421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>史纲 · 毛中特 时间轴（v7.13 数据修正版）</title>
+<style>
+  :root{ --bg1:#0a0e13; --bg2:#101823; --text:#e9f0f8; --muted:#8fa2b6; --line:#22303f; --accent:#7cc4ff; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(1200px 600px at 50% 45%, #14202e 0%, var(--bg1) 70%);color:var(--text);
+    font-family:"SimSun","宋体","NSimSun","新宋体","Microsoft YaHei","PingFang SC",system-ui,sans-serif}
+  #svg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:2}
+  #svg text{font-family:"SimSun","宋体","NSimSun","新宋体",sans-serif}
+  /* ---------- 顶部 UI ---------- */
+  #topLeft{position:fixed;left:186px;top:10px;right:100px;z-index:30;display:flex;flex-direction:column;gap:8px}
+  #title{font-size:15px;font-weight:700;letter-spacing:.5px;color:#dce9f7}
+  #topToggle{position:fixed;right:16px;top:12px;z-index:45}
+  #topLeft.hidden{display:none}
+  body.topHidden #topLeft{display:none!important}
+  #topShow{position:fixed;right:20px;left:auto;top:12px;z-index:40;display:none}
+  #topShow.show{display:block}
+  body.topHidden #wrap{height:100%}
+  body.topHidden #mapBg, body.topHidden #mapFade, body.topHidden #mapVeil{top:0!important;height:74vh!important}
+  body.topHidden #mapInfo{top:56px}
+  body.topHidden #mapFoot{top:82px}
+  body.topHidden #warlordNote{top:220px}
+  #title small{font-weight:400;color:var(--muted);font-size:11px;margin-left:6px}
+  #controls{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  button,.sel{background:#141f2b;color:#d6e4f2;border:1px solid #2e4155;border-radius:8px;padding:5px 10px;
+    font-size:12px;cursor:pointer;transition:.15s}
+  button:hover{border-color:#5b7d9e;background:#1a2a39}
+  button.pri{background:#1c3550;border-color:#3f6a94}
+  #trackTabs{display:flex;gap:4px}
+  #trackTabs button{padding:4px 10px;font-size:12px;border-radius:7px;color:#b9cbdd}
+  #trackTabs button.on{background:#1c3550;border-color:#3f6a94;color:#fff;font-weight:700}
+  .jump{display:flex;gap:4px;flex-wrap:wrap}
+  .jump button{padding:4px 7px;font-size:11.5px;border-radius:6px;color:#b9cbdd}
+  label.ck{display:flex;align-items:center;gap:5px;font-size:12px;color:#b9cbdd;cursor:pointer;user-select:none}
+  #topCenter{position:fixed;left:18px;top:4px;z-index:25;text-align:left;pointer-events:none;
+    display:flex;flex-direction:column;align-items:flex-start;line-height:1}
+  #bigYear{font-size:46px;line-height:1;font-weight:800;letter-spacing:1px;color:#f2f8ff;
+    text-shadow:0 0 28px rgba(124,196,255,.35);font-variant-numeric:tabular-nums}
+  #eraName{margin-top:5px;font-size:11px;color:var(--muted);letter-spacing:.5px;max-width:150px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* ---------- 轴与节点 ---------- */
+  .rail-glow{filter:drop-shadow(0 0 10px rgba(160,200,240,.25))}
+  .era-band{opacity:.22}
+  .tick{stroke:#3d5064;stroke-width:1}
+  .tick-year{fill:#6d8299;font-size:10px}
+  .ev-bar{cursor:pointer;transition:opacity .15s}
+  .ev-dot{cursor:pointer;transition:r .15s ease, opacity .15s ease}
+  .ev-dot.active{filter:drop-shadow(0 0 7px rgba(255,255,255,.85))}
+  .era-tag{font-size:11px;letter-spacing:1.5px;fill:#9db4c8;pointer-events:none;font-weight:600}
+  .ev-lbl{font-size:11.5px;fill:#b9cde2;pointer-events:none}
+  .ev-year{font-size:10px;fill:#7f93a8;pointer-events:none}
+  .arc{fill:none;stroke-width:1.4;stroke-dasharray:7 6;opacity:.75;stroke-linecap:round}
+  .arc-lbl{font-size:10px;font-weight:600;paint-order:stroke;stroke:#0b1118;stroke-width:3;pointer-events:none}
+  .ev-name{font-size:11px;fill:#ffffff;font-weight:600;paint-order:stroke;stroke:#0b1118;stroke-width:2.5;pointer-events:none}
+  #questPanel{position:fixed;left:18px;top:110px;width:420px;height:calc(74vh - 110px);max-height:none;z-index:18;
+    background:linear-gradient(180deg, rgba(15,24,36,.97), rgba(9,15,23,.97));
+    border:1px solid #3d5b78;border-left:4px solid #ffd166;border-bottom:0;border-radius:12px 12px 0 0;
+    box-shadow:0 14px 36px rgba(0,0,0,.55);padding:10px 13px;color:#dce9f6;
+    transition:opacity .25s ease, transform .25s ease;overflow:hidden;display:flex;flex-direction:column}
+  #questPanel.hidden{opacity:0;transform:translateX(-14px);pointer-events:none}
+  body.topHidden #questPanel{top:14px;height:calc(74vh - 14px)}
+  .qpTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+  .qpSection{font-size:11.5px;letter-spacing:1.2px;color:#8fa9bf;margin-top:8px;margin-bottom:3px}
+  .qpMain{font-size:14.5px;line-height:1.7;color:#ffe3a3;font-weight:600;border-left:3px solid #ffd166;padding-left:8px}
+  .qpSideList{margin:0;padding-left:18px;color:#d2e2ef;font-size:13.5px;line-height:1.75}
+  .qpSideList li{margin-bottom:6px}
+  .hl{color:#ffd166;font-weight:700}
+  .hl2{color:#8fd4ff;font-weight:600}
+  .hl3{color:#ff9f9f;font-weight:600}
+  .qpTag{font-size:10px;letter-spacing:1.5px;color:#ffd166}
+  #qpProgress{font-size:10px;color:#8fa9bf}
+  .qpEvent{font-size:21px;font-weight:800;color:#fff;margin-bottom:3px}
+  .qpChapter{font-size:12.5px;color:#9dc3e6;margin-bottom:5px;letter-spacing:.4px}
+  .qpBody{font-size:13.5px;line-height:1.7;overflow-y:auto;min-height:0}
+  .qpBody::-webkit-scrollbar{width:5px}
+  .qpBody::-webkit-scrollbar-thumb{background:#35506a;border-radius:3px}
+  .qpLabel{font-size:10px;letter-spacing:1px;color:#9dc3e6;margin-top:2px}
+  .qpTerm{font-size:15px;font-weight:700;color:#ffd166;margin:2px 0 3px}
+  .qpExplain{color:#cfe0ef;font-size:12px}
+  .qpText{color:#e6eef7;font-size:12px;margin-top:2px}
+  .qpQ{color:#fff;font-size:12.5px;font-weight:600;margin-top:3px}
+  .qpPoints{margin:3px 0 0;padding-left:15px;color:#c6d8e8;font-size:11.5px}
+  .qpPoints li{margin-bottom:2px}
+  .qpActions{display:none}
+  @media (max-width:1100px){ #questPanel{display:none!important} }
+  #battleNote{position:fixed;right:20px;top:180px;z-index:17;pointer-events:none;
+    background:linear-gradient(180deg, rgba(42,24,24,.97), rgba(24,14,18,.97));
+    border:1px dashed #d08a6a;border-radius:10px;padding:9px 12px;color:#ffe6d8;
+    box-shadow:0 12px 30px rgba(0,0,0,.5);opacity:0;transition:opacity .25s;max-width:300px}
+  #battleNote.show{opacity:1}
+  #battleNote .bnTag{font-size:10px;letter-spacing:1px;color:#ffb496;margin-bottom:2px}
+  #battleNote .bnTitle{font-size:14px;font-weight:800;color:#fff}
+  #battleNote .bnLine{font-size:11px;color:#f0c8b4;margin-top:3px;line-height:1.5}
+  #arcLegend{position:fixed;right:80px;top:calc(74vh - 104px);bottom:auto;z-index:26;display:none;
+    background:rgba(10,17,26,.92);border:1px solid #2f4a63;border-radius:9px;padding:7px 10px;
+    font-size:10.5px;color:#b8cfe4;box-shadow:0 8px 20px rgba(0,0,0,.4);pointer-events:none}
+  #arcLegend .alTitle{font-size:10px;color:#8fa9bf;letter-spacing:1px;margin-bottom:3px}
+  #arcLegend .alRow{display:flex;align-items:center;gap:6px;margin:2px 0}
+  #arcLegend .alLine{width:24px;border-top:2px dashed;display:inline-block}
+  #arcLegend .alLine.g{color:#7fd6a7} #arcLegend .alLine.y{color:#ffd166} #arcLegend .alLine.r{color:#ff8f8f}
+  #centerMark{pointer-events:none}
+  /* ---------- 气泡 ---------- */
+  .bubble{position:fixed;z-index:28;pointer-events:none;border-radius:14px;background:rgba(16,24,34,.985);
+    border:1px solid #3a546f;box-shadow:0 18px 50px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.05);
+    opacity:0;transform:translateX(-50%) scale(.96);transition:opacity .18s ease, transform .18s ease;
+    backdrop-filter:blur(8px);max-width:min(600px,92vw)}
+  .bubble.show{opacity:1;transform:translateX(-50%) scale(1)}
+  .bubble .tail{position:absolute;left:50%;width:0;height:0;transform:translateX(-50%)}
+  #titleBubble{display:none!important}
+  #titleBubble{padding:9px 16px;bottom:auto;display:flex;gap:8px;align-items:baseline;white-space:nowrap}
+  #titleBubble .tYear{color:#8ec7ff;font-weight:800;font-size:13px;letter-spacing:.5px}
+  #titleBubble .tName{font-size:17px;font-weight:800;color:#fff;letter-spacing:.5px}
+  #titleBubble .tail{bottom:-9px;border-left:9px solid transparent;border-right:9px solid transparent;border-top:9px solid #3a546f}
+  #titleBubble .tail::after{content:"";position:absolute;left:-8px;top:-10px;border-left:8px solid transparent;
+    border-right:8px solid transparent;border-top:8px solid rgba(18,27,38,.94)}
+  #detailBubble{padding:16px 22px;top:0;line-height:1.7;font-size:14.5px;color:#cddbea;
+    border-left:4px solid #7cc4ff;background:linear-gradient(180deg, rgba(20,30,42,.98), rgba(12,18,26,.98));
+    left:50%!important;right:auto!important;width:min(1120px,calc(100vw - 80px));max-width:none;
+    transform:translateX(-50%);display:block;border-radius:16px;max-height:calc(100vh - 690px);overflow:hidden}
+  #detailBubble.show{opacity:1;transform:translateX(-50%)}
+  #detailBubble .tail{display:none}
+  #detailBubble .dMain{min-width:0;padding-bottom:8px;border-bottom:1px dashed #2f4459}
+  #detailBubble .dSide{border-left:0;border-top:0;padding-left:0;padding-top:8px;min-width:0;
+    max-height:calc(100vh - 790px);overflow-y:auto;pointer-events:auto;padding-right:4px}
+  #detailBubble .dSign{font-size:17px;line-height:1.7}
+  #detailBubble .dTitle{font-size:24px}
+  #detailBubble .dYear{font-size:24px}
+  #detailBubble .tail{top:-10px;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:10px solid #3a546f}
+  #detailBubble .tail::after{content:"";position:absolute;left:-9px;top:2px;border-left:9px solid transparent;
+    border-right:9px solid transparent;border-bottom:9px solid rgba(18,27,38,.94)}
+  #detailBubble .dTop{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  #detailBubble .dEra{font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid;letter-spacing:.5px}
+  #detailBubble .dYear{font-size:22px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+  #detailBubble .dTitle{font-size:19px;font-weight:800;color:#fff;letter-spacing:.5px;margin:1px 0 6px}
+  #detailBubble .dSign{color:#d7e4f2;font-size:13.5px}
+  #detailBubble .dKp{margin-top:0;padding-left:10px;border-left:2px solid #46739b;font-size:11.5px;color:#a9c9e6;line-height:1.5}
+  #detailBubble .dKpHead{font-size:10px;letter-spacing:1px;color:#8fb4d8;margin-bottom:3px}
+  #detailBubble .dKpMeta{font-size:13.5px;color:#a9c9e6;margin-bottom:3px}
+  #detailBubble .dKpPoint{font-size:18px;font-weight:700;color:#fff;margin:2px 0 6px}
+  #detailBubble .dKpKw{color:#c7d9e8;font-size:12.5px;margin-top:2px}
+  #detailBubble .dKpTrap{color:#ffb3a7;font-size:12.5px;margin-top:2px}
+  #detailBubble .dKpEssay{color:#9fd6b8;font-size:12.5px;margin-top:2px}
+  #detailBubble .dKpList{margin:6px 0 0 0;padding-left:18px;color:#c4d8e8;font-size:14px;line-height:1.75;
+    column-count:2;column-gap:30px;column-rule:1px dashed rgba(70,100,130,.35)}
+  #detailBubble .dKpList li{margin-bottom:5px;break-inside:avoid}
+  #detailBubble .dSide{max-height:255px;overflow-y:auto;pointer-events:auto;padding-right:4px}
+  #detailBubble .dSide::-webkit-scrollbar{width:6px}
+  #detailBubble .dSide::-webkit-scrollbar-thumb{background:#2f4a63;border-radius:3px}
+  #detailBubble .dGrp{margin-top:4px;font-size:11px;color:#8fa9bf;line-height:1.5}
+  #detailBubble .dRel{margin-top:8px;padding-top:7px;border-top:1px dashed #2f4459;font-size:12px;color:#93b4d4}
+  /* ---------- 进度条 ---------- */
+  #progress{display:none!important}
+  #track{position:relative;flex:1;height:8px;border-radius:6px;background:#152130;border:1px solid #27394b;overflow:hidden;cursor:pointer}
+  #track .seg{position:absolute;top:0;bottom:0}
+  #thumb{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#fff;
+    box-shadow:0 0 12px rgba(124,196,255,.9);pointer-events:none}
+  #pStart,#pEnd{font-size:10.5px;color:#6f849a;font-variant-numeric:tabular-nums}
+  #hint{position:fixed;right:18px;bottom:14px;font-size:11px;color:#66798e;text-align:right;line-height:1.7;z-index:20}
+  #hint b{color:#9db4ca;font-weight:600}
+  #eraTagBig{position:fixed;left:18px;top:96px;font-size:11px;color:#6f849a;z-index:20}
+  @media (min-width:1800px){ #detailBubble .dKpList{column-count:3} }
+  @media (max-width:1100px){ #detailBubble{right:20px;grid-template-columns:1fr} #detailBubble .dKpList{column-count:1} #detailBubble .dSide{border-left:0;padding-left:0;border-top:1px dashed #2f4459;padding-top:8px} #factionNote{display:none!important} }
+  @media (max-width:820px){ #bigYear{font-size:34px} #topLeft{left:128px;right:60px} #detailBubble{max-width:88vw} #hint{display:none} #mapBg,#mapFade{height:52vh} }
+  /* ---------- 地图背景 ---------- */
+  #mapBg{position:fixed;left:0;top:100px;width:100%;height:calc(74vh - 100px);transform:translateX(-3.2%);z-index:0;opacity:.72;pointer-events:none;
+    -webkit-mask-image:linear-gradient(180deg, transparent 0%, #000 7%, #000 78%, transparent 100%);
+    mask-image:linear-gradient(180deg, transparent 0%, #000 7%, #000 78%, transparent 100%)}
+  #mapFade{position:fixed;left:0;top:100px;width:100%;height:calc(74vh - 100px);z-index:1;pointer-events:none;
+    background:linear-gradient(180deg, rgba(9,13,19,0) 0%, rgba(9,13,19,.02) 48%, rgba(10,14,20,.78) 86%, #0a0e13 100%)}
+  #mapInfo{position:fixed;right:20px;top:106px;z-index:12;font-size:12px;color:#8fb0cd;letter-spacing:.6px;
+    text-shadow:0 1px 8px rgba(0,0,0,.8);pointer-events:none}
+  #annoSvg{position:fixed;inset:0;width:100%;height:100%;z-index:17;pointer-events:none;overflow:visible}
+  #terrLine{fill:none;stroke:#ffcf6e;stroke-width:1.5;stroke-dasharray:6 5;opacity:0;filter:drop-shadow(0 0 4px rgba(255,207,110,.8))}
+  #terrDot{fill:#ffcf6e;opacity:0;filter:drop-shadow(0 0 8px rgba(255,207,110,.9))}
+  #terrAnchor{fill:#0a0e13;stroke:#ffcf6e;stroke-width:2;opacity:0}
+  #taipingNote{position:fixed;z-index:17;transform:translate(-50%,-100%);pointer-events:none;
+    background:linear-gradient(180deg, rgba(42,24,64,.98), rgba(24,14,38,.98));
+    border:1px dashed #c98bff;border-radius:10px;padding:8px 12px;color:#f3e6ff;
+    box-shadow:0 12px 30px rgba(0,0,0,.55), 0 0 18px rgba(170,100,255,.35);
+    opacity:0;transition:opacity .3s ease;max-width:250px;text-align:left}
+  #taipingNote.show{opacity:1}
+  #taipingNote.flash{animation:annoPulse .55s ease 3}
+  #taipingNote::after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);
+    border-left:7px solid transparent;border-right:7px solid transparent;border-top:8px dashed #c98bff}
+  #taipingNote .tnTag{font-size:10px;letter-spacing:1px;color:#d9b8ff;margin-bottom:2px}
+  #taipingNote .tnTitle{font-size:15px;font-weight:800;color:#fff}
+  #taipingNote .tnSub{font-size:11px;color:#cbb6e8;margin-top:3px;line-height:1.45}
+  #factionNote{position:fixed;right:20px;top:calc(74vh - 235px);z-index:16;pointer-events:none;
+    background:linear-gradient(180deg, rgba(16,26,40,.98), rgba(10,17,27,.98));
+    border:1px solid #3a5672;border-left:3px solid #7cc4ff;border-radius:10px;padding:9px 12px;
+    color:#e6f0fa;box-shadow:0 12px 30px rgba(0,0,0,.5);opacity:0;transition:opacity .25s ease;max-width:260px}
+  #factionNote.show{opacity:1}
+  #factionNote .fnTag{font-size:10px;letter-spacing:1px;color:#8fb4d8;margin-bottom:3px}
+  #factionNote .fnTitle{font-size:14px;font-weight:800;color:#fff}
+  #factionNote .fnList{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:5px;font-size:10.5px;color:#c8d8e8}
+  #factionNote .fnItem{display:flex;align-items:center;gap:4px}
+  #factionNote .fnDot{width:8px;height:8px;border-radius:2px;display:inline-block}
+  #factionTip{position:fixed;z-index:27;pointer-events:none;display:none;
+    background:rgba(10,16,24,.96);border:1px solid #46688a;border-radius:7px;padding:5px 9px;
+    font-size:12px;color:#e8f2fc;box-shadow:0 8px 22px rgba(0,0,0,.5);white-space:nowrap}
+  #warlordNote{position:fixed;right:20px;top:296px;z-index:16;pointer-events:none;
+    background:linear-gradient(180deg, rgba(18,26,38,.97), rgba(11,17,25,.97));
+    border:1px dashed #7f9bb8;border-radius:10px;padding:9px 12px;color:#e6f0fa;
+    box-shadow:0 12px 30px rgba(0,0,0,.5);opacity:0;transition:opacity .3s ease;max-width:250px}
+  #warlordNote.show{opacity:1}
+  #warlordNote.flash{animation:annoPulse .55s ease 2}
+  #warlordNote .wnTag{font-size:10px;letter-spacing:1px;color:#9dc3e6;margin-bottom:3px}
+  #warlordNote .wnTitle{font-size:14px;font-weight:800;color:#fff}
+  #warlordNote .wnList{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:5px;font-size:10.5px;color:#c8d8e8}
+  #warlordNote .wnItem{display:flex;align-items:center;gap:4px}
+  #warlordNote .wnDot{width:7px;height:7px;border-radius:50%;display:inline-block}
+  @keyframes annoPulse{0%,100%{box-shadow:0 12px 30px rgba(0,0,0,.55),0 0 10px rgba(170,100,255,.2)}
+    50%{box-shadow:0 12px 36px rgba(0,0,0,.6),0 0 34px rgba(200,120,255,.9)}}
+  @keyframes annoGlow{0%,100%{box-shadow:0 18px 55px rgba(0,0,0,.55),0 0 0 rgba(255,207,110,0)}
+    50%{box-shadow:0 18px 55px rgba(0,0,0,.65),0 0 28px rgba(255,207,110,.55)}}
+  #terrPopup.anno{animation:annoGlow 1.1s ease 2}
+  #eventPopup{position:fixed;right:20px;top:172px;z-index:17;width:min(330px,30vw);
+    background:rgba(14,21,30,.97);border:1px solid #3a546f;border-left:5px solid #7cc4ff;
+    border-radius:12px;padding:10px 14px;color:#dce9f6;opacity:0;pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;transform:translateX(14px) scale(.98);
+    box-shadow:0 18px 55px rgba(0,0,0,.55)}
+  #eventPopup.show{opacity:1;transform:none}
+  #eventPopup .tpTop{display:flex;align-items:baseline;gap:10px;margin-bottom:3px}
+  #eventPopup .tpYear{font-size:13px;font-weight:800;color:#8ec7ff;letter-spacing:.5px}
+  #eventPopup .tpKind{font-size:11px;color:#91a8bf;border:1px solid #334a60;border-radius:20px;padding:1px 7px}
+  #eventPopup .tpTitle{font-size:18px;font-weight:800;color:#fff;letter-spacing:.5px}
+  #eventPopup .tpPlace{font-size:10.5px;color:#ffd479;margin-top:4px;line-height:1.5;border-top:1px solid rgba(255,212,121,.2);padding-top:4px}
+  #eventPopup .tpDetail{margin-top:4px;font-size:13px;color:#c7d6e6;line-height:1.55}
+  #eventPopup .tpTag{font-size:10px;letter-spacing:1.2px;color:#ffcf6e;margin-bottom:4px}
+  #siteLink{fill:none;stroke:#ffd479;stroke-width:1.1;stroke-dasharray:4 3;opacity:0;filter:drop-shadow(0 0 3px rgba(255,212,121,.55))}
+  #eventLine{fill:none;stroke:#8ec7ff;stroke-width:1.4;stroke-dasharray:5 5;opacity:0;filter:drop-shadow(0 0 3px rgba(142,199,255,.7))}
+  #eventDot{fill:#8ec7ff;opacity:0;filter:drop-shadow(0 0 6px rgba(142,199,255,.8))}
+  #eventAnchor{fill:#0a0e13;stroke:#8ec7ff;stroke-width:2;opacity:0}
+  #terrPopup{position:fixed;right:20px;top:300px;transform:translateX(18px) scale(.97);
+    z-index:18;width:min(330px,30vw);background:rgba(14,21,30,.97);border:1px solid #3a546f;
+    border-left:5px solid #7cc4ff;border-radius:12px;padding:10px 14px;color:#dce9f6;
+    opacity:0;pointer-events:none;transition:opacity .28s ease, transform .28s ease;
+    box-shadow:0 18px 55px rgba(0,0,0,.55)}
+  #terrPopup.show{opacity:1;transform:translateX(0) scale(1)}
+  #terrPopup.left{right:auto;left:20px;transform:translateX(-18px) scale(.97)}
+  #terrPopup.left.show{transform:translateX(0) scale(1)}
+  #terrPopup.loss{border-left-color:#ff5d5d}
+  #terrPopup.gain{border-left-color:#48d17a}
+  #terrPopup.era{border-left-color:#7cc4ff}
+  #terrPopup .tpTop{display:flex;align-items:baseline;gap:10px;margin-bottom:3px}
+  #terrPopup .tpYear{font-size:13px;font-weight:800;color:#8ec7ff;letter-spacing:.5px}
+  #terrPopup .tpKind{font-size:11px;color:#91a8bf;border:1px solid #334a60;border-radius:20px;padding:1px 7px}
+  #terrPopup .tpTitle{font-size:17px;font-weight:800;color:#fff;letter-spacing:.5px}
+  #terrPopup .tpDetail{margin-top:4px;font-size:13px;color:#c7d6e6;line-height:1.55}
+  #terrPopup .tpTag{font-size:10px;letter-spacing:1.2px;color:#ffcf6e;margin-bottom:4px}
+  #mapZoomCtl{position:fixed;right:20px;top:calc(74vh - 140px);z-index:26;display:flex;flex-direction:column;gap:5px}
+  #mapZoomCtl button{width:30px;height:30px;padding:0;font-size:16px;font-weight:700;border-radius:8px;
+    background:rgba(14,22,32,.9);border:1px solid #35506a;color:#cfe4f8;
+    box-shadow:0 6px 18px rgba(0,0,0,.45);cursor:pointer}
+  #mapZoomCtl button:hover{background:#1b2c3e;border-color:#5b86ad}
+  #mapZoomCtl button.small{font-size:11px}
+  body.topHidden #mapZoomCtl{top:calc(74vh - 140px)}
+  #mapDrag{position:fixed;left:0;top:100px;width:100%;height:calc(74vh - 100px);z-index:3;
+    cursor:grab;touch-action:none}
+  #mapDrag.dragging{cursor:grabbing}
+  body.topHidden #mapDrag{top:0;height:calc(74vh - 20px)}
+  #mapVeil{position:fixed;left:0;top:100px;width:100%;height:calc(74vh - 100px);z-index:1;
+    background:#0a0e13;opacity:0;pointer-events:none;transition:opacity .26s ease}
+  #locator{position:fixed;left:20px;top:calc(74vh - 150px);width:168px;z-index:12;display:none;
+    background:rgba(10,15,22,.62);border:1px solid rgba(70,100,130,.5);border-radius:10px;
+    padding:6px 6px 3px;backdrop-filter:blur(4px)}
+  #locSvg{width:156px;height:100px;display:block}
+  #locLabel{font-size:10.5px;color:#8fa9c0;text-align:center;margin-top:1px}
+  #mapFoot{position:fixed;right:20px;top:132px;z-index:12;font-size:11px;color:#7d95ad;
+    display:flex;gap:10px;pointer-events:none;text-shadow:0 1px 6px rgba(0,0,0,.8);
+    background:rgba(10,15,22,.35);border:1px solid rgba(60,85,110,.35);border-radius:7px;padding:3px 9px}
+  /* ---------- 旧地图面板（已改为背景，样式保留占位） ---------- */
+  #mapPanel{position:fixed;right:18px;top:104px;width:412px;height:336px;z-index:24;border-radius:14px;
+    background:rgba(14,21,30,.92);border:1px solid #2b4055;box-shadow:0 18px 50px rgba(0,0,0,.5);
+    display:flex;flex-direction:column;overflow:hidden;backdrop-filter:blur(8px);transition:transform .25s ease,opacity .25s}
+  #mapPanel.collapsed{transform:translateX(calc(100% + 26px));opacity:0;pointer-events:none}
+  #mapHead{display:flex;align-items:center;justify-content:space-between;padding:7px 11px;border-bottom:1px solid #24384c;
+    font-size:12px;color:#cfe0f2;letter-spacing:.5px}
+  #mapHead b{font-weight:700;color:#eaf4ff}
+  #mapHead .sub{color:#8098b0;font-size:11px;margin-left:6px}
+  #mapToggle{background:#1a2a3a;border:1px solid #2f4a63;color:#bcd2e8;border-radius:6px;font-size:11px;padding:2px 7px;cursor:pointer}
+  #mapWrap{flex:1;position:relative;min-height:0}
+  #mapSvg{position:absolute;inset:0;width:100%;height:100%;display:block;background:radial-gradient(400px 220px at 55% 40%, rgba(30,60,90,.35), rgba(8,12,17,.2))}
+  #mapFoot{font-size:10.5px;color:#7690a8;padding:4px 10px;border-top:1px solid #1e2f40;display:flex;justify-content:space-between}
+  #mapOpen{position:fixed;right:18px;top:104px;z-index:24;display:none}
+  #mapOpen.show{display:block}
+
+  /* ================= 最终布局覆盖 v3.9 ================= */
+  body, button, select, input, textarea { font-family:"SimSun","宋体","NSimSun","新宋体","Microsoft YaHei","PingFang SC",sans-serif; }
+  #svg text, .ev-name, .tick-year, .era-tag { font-family:"SimSun","宋体","NSimSun","新宋体",sans-serif; }
+  .ev-name { font-size:12px !important; fill:#ffffff !important; font-weight:600; }
+
+  #questPanel {
+    left:18px !important; top:110px !important; bottom:0 !important;
+    width:500px !important; height:auto !important; max-height:none !important;
+    border-radius:12px 12px 0 0 !important; border-bottom:0 !important;
+    display:flex !important; flex-direction:column;
+  }
+  body.topHidden #questPanel { top:96px !important; bottom:0 !important; }
+  .qpEvent { font-size:24px !important; }
+  .qpChapter { font-size:14px !important; }
+  .qpSection { font-size:13px !important; }
+  .qpMain { font-size:17px !important; line-height:1.75 !important; }
+  .qpSideList { font-size:15px !important; line-height:1.8 !important; padding-left:20px !important; }
+  .qpSideList li { margin-bottom:7px !important; }
+  .qpBody { flex:1 !important; font-size:16.5px !important; line-height:1.8 !important; overflow-y:hidden !important; }
+
+  #detailBubble {
+    left:530px !important; right:20px !important; width:auto !important;
+    top:auto; bottom:18px !important; transform:none !important;
+    display:flex !important; flex-direction:column !important;
+    max-height:none !important; border-radius:16px !important;
+    padding:18px 26px !important; font-size:16px !important; line-height:1.8 !important;
+  }
+  #detailBubble.show { opacity:1 !important; transform:none !important; }
+  #detailBubble .dMain { flex:0 0 auto !important; }
+  #detailBubble .dSide { flex:1 !important; max-height:none !important; overflow-y:auto !important; }
+  #detailBubble .dTitle { font-size:28px !important; }
+  #detailBubble .dYear { font-size:26px !important; }
+  #detailBubble .dSign { font-size:19px !important; line-height:1.8 !important; }
+  #detailBubble .dKpMeta { font-size:15px !important; }
+  #detailBubble .dKpPoint { font-size:20px !important; }
+  #detailBubble .dKpKw, #detailBubble .dKpTrap, #detailBubble .dKpEssay { font-size:14.5px !important; }
+  #detailBubble .dKpList { font-size:15.5px !important; line-height:1.8 !important; }
+  #detailBubble .dKpList li { margin-bottom:6px !important; }
+
+  @media (max-width:1100px) {
+    #questPanel { display:none !important; }
+    #detailBubble { left:20px !important; right:20px !important; bottom:14px !important; }
+  }
+
+
+  #detailBubble .dFacts { margin-top:10px; padding-top:9px; border-top:1px dashed #2f4459; }
+  #detailBubble .dFactsHead { font-size:12px; letter-spacing:1px; color:#9dc3e6; margin-bottom:3px; }
+  #detailBubble .dFacts ul { margin:2px 0 0; padding-left:18px; color:#d2e2ef;
+    font-size:14.5px; line-height:1.75; column-count:2; column-gap:32px; column-rule:1px dashed rgba(70,100,130,.3); }
+  #detailBubble .dFacts li { margin-bottom:5px; break-inside:avoid; }
+  @media (max-width:1100px){ #detailBubble .dFacts ul{column-count:1} }
+
+
+  /* ===== v4.2 历史背景分类与字号 ===== */
+  .qpTag { font-size:14px !important; letter-spacing:2px !important; color:#ffd166 !important; }
+  .qpChapter { font-size:15.5px !important; }
+  .qpSection { font-size:16px !important; color:#9dc3e6 !important; letter-spacing:1.5px; margin-top:12px !important; }
+  #qpBackground, #qpTask { font-size:18px !important; line-height:1.8 !important; color:#e6eef7 !important; }
+  #qpContradiction { font-size:17px !important; line-height:1.8 !important; color:#ffe3a3 !important;
+    border-left:3px solid #ffd166; padding-left:10px; font-weight:600; }
+  #qpTask { color:#ffe3a3 !important; border-left:3px solid #ffd166; padding-left:10px; font-weight:600; }
+  .qpSideList { font-size:16.5px !important; line-height:1.85 !important; }
+  .qpBody { font-size:16.5px !important; }
+  #detailBubble .dFacts ul { font-size:15.5px !important; }
+
+
+  /* ===== v5.4 轴下留白 + 大字号 ===== */
+  #detailBubble { display:none !important; }
+  .ev-name { font-size:16px !important; font-weight:700 !important; stroke-width:3 !important; }
+  #eventPopup { width:360px !important; }
+  #eventPopup .tpTag { font-size:12px !important; }
+  #eventPopup .tpYear { font-size:16px !important; }
+  #eventPopup .tpKind { font-size:12px !important; }
+  #eventPopup .tpTitle { font-size:24px !important; }
+  #eventPopup .tpDetail { font-size:16px !important; line-height:1.7 !important; font-weight:500 !important; }
+
+
+  /* ===== v5.5 坐标轴再下移 + 任务栏圆角收底 ===== */
+  #questPanel {
+    bottom:12px !important;
+    border-radius:14px !important;
+    border-bottom:1px solid #3d5b78 !important;
+  }
+  body.topHidden #questPanel {
+    bottom:12px !important;
+  }
+
+
+  /* ===== v5.6 文字锐化 ===== */
+  html, body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  #svg text, #mapBg text {
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+  }
+  .ev-name {
+    font-family:"SimSun","宋体","NSimSun","新宋体",sans-serif !important;
+    font-weight:700 !important;
+    font-size:16px !important;
+    stroke-width:1.15 !important;
+    paint-order:stroke !important;
+    letter-spacing:.3px;
+  }
+  .arc-lbl {
+    font-family:"SimSun","宋体","NSimSun","新宋体",sans-serif !important;
+    font-weight:600 !important;
+    stroke-width:1.3 !important;
+  }
+  .tick-year, .era-tag {
+    font-family:"SimSun","宋体","NSimSun","新宋体",sans-serif !important;
+    font-weight:500 !important;
+  }
+  .qpTag, .qpChapter, .qpSection {
+    font-family:"SimSun","宋体","NSimSun","新宋体",sans-serif !important;
+    font-weight:700 !important;
+  }
+  #eventPopup .tpTag, #eventPopup .tpYear, #eventPopup .tpKind {
+    font-family:"SimSun","宋体","NSimSun","新宋体",sans-serif !important;
+    font-weight:700 !important;
+  }
+  .wl-label, #mapSites text {
+    stroke-width:1.15 !important;
+    font-weight:500 !important;
+  }
+
+
+  /* ===== v5.6 小字改用清晰 UI 字体，标题保留楷体 ===== */
+  #qpBackground, #qpContradiction, #qpTask,
+  #questPanel .qpBody, #questPanel .qpSideList,
+  #eventPopup .tpDetail {
+    font-family:"SimSun","宋体","NSimSun","新宋体",sans-serif !important;
+    font-weight:400 !important;
+  }
+  #qpBackground { font-weight:500 !important; }
+  #qpContradiction, #qpTask { font-weight:600 !important; }
+
+
+  /* ===== v5.8 仿宋：禁用假粗体，避免笔画糊边 ===== */
+  html, body, #questPanel, #eventPopup, #svg text, #mapBg text {
+    font-synthesis: none !important;
+  }
+  .ev-name, .arc-lbl,
+  #questPanel .qpEvent, #questPanel .qpSection, #questPanel .qpTag, #questPanel .qpChapter,
+  #questPanel #qpBackground, #questPanel #qpContradiction, #questPanel #qpTask,
+  #questPanel .qpBody, #questPanel .qpSideList,
+  #eventPopup .tpTag, #eventPopup .tpYear, #eventPopup .tpKind, #eventPopup .tpTitle, #eventPopup .tpDetail {
+    font-weight:400 !important;
+  }
+  #bigYear, #title, #trackTabs button.on, .qpEvent, #eventPopup .tpTitle {
+    font-weight:700 !important;
+  }
+
+
+  /* v6.2 任务栏内容溢出时可滚动 */
+  #questPanel {
+    display:block !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+  }
+  #questPanel .qpBody {
+    flex:none !important;
+    overflow:visible !important;
+  }
+  #questPanel::-webkit-scrollbar { width:6px; }
+  #questPanel::-webkit-scrollbar-thumb { background:#35506a; border-radius:3px; }
+  .qpPeriodNote { font-size:12px; color:#8fa9bf; font-weight:400; }
+
+
+  #mapPolicy{position:fixed;right:20px;bottom:40px;z-index:12;font-size:10px;line-height:1.6;
+    color:#73879c;text-align:right;pointer-events:none;letter-spacing:.3px}
+  #questPanel{overscroll-behavior:contain}
+
+
+  #standardMap{position:fixed;right:20px;bottom:38px;z-index:13;width:170px;display:block;
+    background:#0b1118;border:1px solid #3d5b78;border-radius:6px;padding:3px;text-decoration:none;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);opacity:.92}
+  #standardMap img{display:block;width:100%;height:auto;border-radius:3px}
+  #standardMap span{display:block;margin-top:2px;font-size:9px;line-height:1.3;color:#9fb4c8;text-align:center}
+  #standardMap:hover{opacity:1}
+\n  #factionNote .fnHint{font-size:10px;color:#8fa9bf;margin-top:6px;line-height:1.4;border-top:1px solid #2f4459;padding-top:5px}
+  #battleNote, #taipingNote { display:none !important; }
+  #factionTip { white-space:normal; max-width:300px; line-height:1.5; }
+</style>
+</head>
+<body>
+<svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<div id="topLeft">
+  <div id="title">史纲 · 毛中特 时间轴 <small>v7.13 数据修正版</small></div>
+  <button id="topToggle">隐藏边栏</button>
+  <div id="controls">
+    <button id="playBtn" class="pri">▶ 播放</button>
+    <select id="speedSel" class="sel" title="速度">
+      <option value="0.5">0.5×</option>
+      <option value="1" selected>1×</option>
+      <option value="2">2×</option>
+      <option value="4">4×</option>
+    </select>
+    <button id="dirBtn" title="翻转方向">→ 正放</button>
+    <label class="ck"><input type="checkbox" id="dwellChk" checked> 节点减速</label>
+    <label class="ck"><input type="checkbox" id="mapChk" checked> 地图背景</label>
+    <label class="ck"><input type="checkbox" id="factionChk" checked> 势力图</label>
+    <label class="ck"><input type="checkbox" id="persistChk"> 常驻标注</label>
+    <label class="ck"><input type="checkbox" id="questChk" checked> 任务提示</label>
+    <span style="width:10px"></span>
+    <div id="trackTabs">
+      <button data-track="shi" class="on">史纲</button>
+      <button data-track="mao">毛中特</button>
+      <button data-track="all">全部</button>
+    </div>
+    <div class="jump">
+      <button data-jump="1700">开端</button>
+      <button data-jump="1840">1840</button>
+      <button data-jump="1919">1919</button>
+      <button data-jump="1949">1949</button>
+      <button data-jump="1978">1978</button>
+      <button data-jump="2012">2012</button>
+    </div>
+  </div>
+</div>
+
+<div id="topCenter">
+  <div id="bigYear">1750</div>
+  <div id="eraName">开端的开端 · 1840 年之前</div>
+</div>
+
+<div id="titleBubble" class="bubble">
+  <span class="tYear" id="tbYear">1840</span><span class="tName" id="tbName">鸦片战争</span>
+  <i class="tail"></i>
+</div>
+
+<div id="detailBubble" class="bubble">
+  <div class="dMain">
+    <div class="dTop"><span class="dEra" id="dbEra">上编</span><span class="dYear" id="dbYear">1840</span></div>
+    <div class="dTitle" id="dbTitle">鸦片战争</div>
+    <div class="dSign" id="dbSign"></div>
+    <div class="dFacts" id="dbFacts"></div>
+  </div>
+  <div class="dSide">
+    <div class="dKp" id="dbKp"></div>
+    <div class="dGrp" id="dbGrp"></div>
+    <div class="dRel" id="dbRel"></div>
+  </div>
+  <i class="tail"></i>
+</div>
+
+<div id="progress">
+  <span id="pStart">1700</span>
+  <div id="track"><div id="thumb"></div></div>
+  <span id="pEnd">2022</span>
+</div>
+<svg id="mapBg" preserveAspectRatio="xMidYMid meet"></svg>
+<div id="mapDrag"></div>
+<div id="mapZoomCtl">
+  <button id="mapZoomIn" title="放大地图">＋</button>
+  <button id="mapZoomOut" title="缩小地图">−</button>
+  <button id="mapZoomReset" class="small" title="恢复全图">复位</button>
+</div>
+<div id="mapFade"></div>
+<div id="mapVeil"></div>
+<div id="mapInfo"><span id="mapSub">中国 · 事件定位</span></div>
+<div id="mapFoot"><span id="mapFootL">—</span><span id="mapFootR">中国地图</span></div>
+<div id="locator">
+  <svg id="locSvg" viewBox="0 0 156 100"></svg>
+  <div id="locLabel">中国 · 定位</div>
+</div>
+  <div id="terrPopup"></div>
+<div id="eventPopup">
+  <div class="tpTag">事件定位</div>
+  <div class="tpTop"><span class="tpYear" id="epYear"></span><span class="tpKind">时间轴</span></div>
+  <div class="tpTitle" id="epTitle"></div>
+  <div class="tpDetail" id="epDetail"></div>
+  <div class="tpPlace" id="epPlace"></div>
+</div>
+  <div id="warlordNote">
+    <div class="wnTag">批注 · 军阀割据</div>
+    <div class="wnTitle"></div>
+    <div class="wnList"></div>
+  </div>
+  <div id="factionNote">
+  <div class="fnTag">势力图 · 省界示意</div>
+  <div class="fnTitle"></div>
+  <div class="fnList"></div>
+</div>
+<div id="factionTip"></div>
+<div id="taipingNote">
+    <div class="tnTag">批注 · 独立政权</div>
+    <div class="tnTitle">太平天国</div>
+    <div class="tnSub">1851–1864 · 天京（南京）与清廷对峙</div>
+  </div>
+  <svg id="annoSvg" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="annoArrowEnd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#ffcf6e"/>
+    </marker>
+    <marker id="annoArrowStart" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#ffcf6e"/>
+    </marker>
+  </defs>
+  <path id="terrLine"></path>
+  <circle id="terrAnchor" r="3.5"></circle>
+  <circle id="terrDot" r="4"></circle>
+  <path id="eventLine"></path>
+<path id="siteLink"></path>
+  <circle id="eventAnchor" r="3.5"></circle>
+  <circle id="eventDot" r="4"></circle>
+</svg>
+<button id="topShow">☰ 菜单</button>
+<a id="standardMap" href="standard_map_GS2019_1823.jpg" target="_blank" rel="noopener" title="自然资源部标准地图 GS(2019)1823号">
+  <img src="standard_map_GS2019_1823.jpg" alt="中国标准地图 GS(2019)1823号">
+  <span>标准地图 · GS(2019)1823号</span>
+</a>
+<div id="hint"><b>空格</b> 暂停/播放 · <b>←/→</b> 连续微调 · <b>地图区</b> 拖动平移 / 滚轮缩放（不再自动移动）· <b>时间轴</b> 拖动擦洗 / 滚轮缩放</div>
+<div id="battleNote">
+  <div class="bnTag">批注 · 战略决战</div>
+  <div class="bnTitle">三大战役</div>
+  <div class="bnLine">辽沈（锦州—沈阳） · 淮海（徐州—陈官庄） · 平津（北平—天津）</div>
+</div>
+<div id="questPanel" class="hidden">
+  <div class="qpTop"><span class="qpTag">历史背景</span></div>
+  <div id="qpEvent" class="qpEvent">事件</div>
+  <div id="qpChapter" class="qpChapter"></div>
+  <div class="qpSection">历史背景</div>
+  <div id="qpBackground" class="qpBackground"></div>
+  <div class="qpSection">根本矛盾（主要矛盾）</div>
+  <div id="qpContradiction" class="qpContradiction"></div>
+  <div class="qpSection">历史任务</div>
+  <div id="qpTask" class="qpTask"></div>
+  <div class="qpSection">关键考点</div>
+  <div id="qpBody" class="qpBody"></div>
+</div>
+<div id="arcLegend">
+  <div class="alTitle">虚线 · 考点关联</div>
+  <div class="alRow"><i class="alLine g"></i>促进 / 推动 / 发展</div>
+  <div class="alRow"><i class="alLine y"></i>因果 / 背景 / 转折</div>
+  <div class="alRow"><i class="alLine r"></i>阻碍 / 失败 / 被迫</div>
+</div>
+
+<script src="mapdata.js"></script>
+<script src="qing_phases.js"></script>
+<script src="qing_provinces.js"></script>
+<script src="layers.js"></script>
+<script src="kaodian.js"></script>
+<script>
+/* ===================== 数据 ===================== */
+const START = 1700, END = 2022;
+/* 非等比时间轴：事件密集期（1919–1949）放大，稀疏期压缩 */
+const SEGMENTS = [
+  {from:1700, to:1840, px:10},
+  {from:1840, to:1919, px:12},
+  {from:1919, to:1949, px:60},
+  {from:1949, to:1978, px:12},
+  {from:1978, to:2012, px:9},
+  {from:2012, to:2022, px:11}
+];
+const SEG_OFF = [];
+(function(){ let acc = 0; for (const sg of SEGMENTS){ SEG_OFF.push(acc); acc += (sg.to - sg.from) * sg.px; } SEG_OFF.push(acc); })();
+const TOTAL_X = SEG_OFF[SEG_OFF.length - 1];
+function xOf(year){
+  if (year <= START) return 0;
+  for (let i = 0; i < SEGMENTS.length; i++){
+    const sg = SEGMENTS[i];
+    if (year <= sg.to) return SEG_OFF[i] + (year - sg.from) * sg.px;
+  }
+  return TOTAL_X;
+}
+function yearAt(x){
+  x = Math.max(0, Math.min(TOTAL_X, x));
+  for (let i = 0; i < SEGMENTS.length; i++){
+    const sg = SEGMENTS[i];
+    const w = (sg.to - sg.from) * sg.px;
+    if (x <= SEG_OFF[i] + w) return sg.from + (x - SEG_OFF[i]) / sg.px;
+  }
+  return END;
+}
+const BASE_SPEED = 2.2;       // 年/秒（1×）
+
+const MAO_ERA = {id:'mao', name:'毛中特 · 会议与著作', color:'#d9a441'};
+const ERAS = [
+  {id:'pre', name:'开端的开端（1840 前）',               start:1700, end:1840, color:'#8b95a5'},
+  {id:'up',  name:'上编 · 旧民主主义革命 1840–1919',    start:1840, end:1919, color:'#e08b5f'},
+  {id:'mid', name:'中编 · 新民主主义革命 1919–1949',    start:1919, end:1949, color:'#e05d5d'},
+  {id:'d1',  name:'下编 · 社会主义革命与建设 1949–1978',start:1949, end:1978, color:'#4f8fd9'},
+  {id:'d2',  name:'改革开放与现代化 1978–2012',         start:1978, end:2012, color:'#3fa08a'},
+  {id:'new', name:'新时代 2012–',                        start:2012, end:2022, color:'#8b7be8'}
+];
+
+const EVENTS = [
+  {"id":"p1","year":1760,"era":"pre","title":"英国工业革命","sign":"生产力飞跃、资本主义扩张，急需海外市场与原料，世界格局开始巨变。","links":[]},
+  {"id":"p2","year":1793,"era":"pre","title":"马戛尔尼访华","sign":"中西礼仪与制度冲突，清廷闭关自守，错失融入世界的机会。","links":["p1"]},
+  {"id":"p3","year":1839,"era":"pre","title":"虎门销烟","sign":"禁烟运动打击鸦片走私，成为英国发动侵华战争的直接借口。","links":["p2"]},
+  {"id":"e1840","year":1840,"era":"up","title":"鸦片战争","sign":"中国近代史开端：开始沦为半殖民地半封建社会，主要矛盾与革命任务由此改变。","links":["p3"]},
+  {"id":"e1842","year":1842,"era":"up","title":"南京条约","sign":"中国近代第一个不平等条约：割香港岛、赔款、五口通商、协定关税。","links":["e1840"]},
+  {"id":"e1851","year":1851,"era":"up","title":"太平天国运动","sign":"旧式农民战争的最高峰，沉重打击清朝统治与外国侵略势力。","links":["e1842"]},
+  {"id":"e1856","year":1856,"era":"up","title":"第二次鸦片战争","sign":"半殖民地化程度进一步加深，圆明园被焚，更多主权丧失。","links":["e1851"]},
+  {"id":"e1860bj","year":1860,"era":"up","title":"《北京条约》","sign":"第二次鸦片战争结束：割九龙司、增开天津、赔款，半殖民地化进一步加深。","links":["e1856"]},
+  {"id":"e1861","year":1861,"era":"up","title":"洋务运动","sign":"“自强求富”，中国近代化的开端；只学技术、不改制度，甲午战败宣告破产。","links":["e1856"]},
+  {"id":"e1864tj","year":1864,"era":"up","title":"太平天国失败","sign":"天京陷落，旧式农民战争最高峰结束；农民阶级不能领导中国革命胜利。","links":["e1851","e1860bj"]},
+  {"id":"e1864nw","year":1864,"era":"up","title":"《勘分西北界约记》","sign":"沙俄割占巴尔喀什湖以东以南约 44 万平方公里，西北边疆危机加深。","links":["e1860bj"]},
+  {"id":"e1865jn","year":1865,"era":"up","title":"江南制造总局","sign":"洋务运动最大军事工业；引进机器、翻译书籍、培养人才，但不改封建制度。","links":["e1861"]},
+  {"id":"e1866fz","year":1866,"era":"up","title":"福州船政局","sign":"洋务派创办的近代造船工业，附设船政学堂，培养海军人才。","links":["e1861"]},
+  {"id":"e1872zs","year":1872,"era":"up","title":"轮船招商局","sign":"洋务运动民用工业代表，标志“自强”到“求富”的转变。","links":["e1861"]},
+  {"id":"e1874tw","year":1874,"era":"up","title":"日本侵台","sign":"日本借牡丹社事件侵犯台湾，东南海疆危机显现；清政府赔款了结。","links":["e1864nw"]},
+  {"id":"e1876yt","year":1876,"era":"up","title":"《烟台条约》","sign":"马嘉理事件后英国迫使清政府签订，增开商埠、允许入藏，侵略权益扩大。","links":["e1876xj"]},
+  {"id":"e1876xj","year":1876,"era":"up","title":"左宗棠收复新疆","sign":"“先北后南、缓进急战”，收复新疆大部；1884 年新疆建省。","links":["e1864nw"]},
+  {"id":"e1881yl","year":1881,"era":"up","title":"《伊犁条约》","sign":"收回伊犁九城及特克斯河谷，但仍割让霍尔果斯河以西地区。","links":["e1876xj"]},
+  {"id":"e1883zf","year":1883,"era":"up","title":"中法战争","sign":"马尾海战、镇南关大捷；中国“不败而败”，法国势力深入西南。","links":["e1881yl"]},
+  {"id":"e1884xj","year":1884,"era":"up","title":"新疆建省","sign":"左宗棠收复新疆后建省，加强西北边疆管理。","links":["e1876xj"]},
+  {"id":"e1885tw","year":1885,"era":"up","title":"台湾建省","sign":"中法战争后台湾建省，刘铭传为首任巡抚，加强东南海防。","links":["e1883zf"]},
+  {"id":"e1888bh","year":1888,"era":"up","title":"北洋海军成军","sign":"洋务运动军事成就；甲午一战全军覆没，说明只学技术不能救国。","links":["e1861"]},
+  {"id":"e1890hy","year":1890,"era":"up","title":"汉阳铁厂","sign":"张之洞创办的近代钢铁企业，洋务运动后期民用工业代表。","links":["e1861"]},
+  {"id":"e1894","year":1894,"era":"up","title":"甲午中日战争","sign":"民族危机空前严重，洋务运动破产，刺激维新与革命。","links":["e1888bh"]},
+  {"id":"e1895","year":1895,"era":"up","title":"马关条约","sign":"割地赔款、允许设厂，半殖民地化大大加深。","links":["e1894"]},
+  {"id":"e1898","year":1898,"era":"up","title":"戊戌维新","sign":"资产阶级维新运动，思想启蒙；失败说明改良道路走不通。","links":["e1895"]},
+  {"id":"e1900","year":1900,"era":"up","title":"义和团运动","sign":"农民反帝爱国运动，粉碎列强瓜分中国的图谋。","links":["e1898"]},
+  {"id":"e1901","year":1901,"era":"up","title":"辛丑条约","sign":"中国完全沦为半殖民地半封建社会，清政府成为“洋人的朝廷”。","links":["e1900"]},
+  {"id":"e1905","year":1905,"era":"up","title":"同盟会成立","sign":"第一个全国性资产阶级革命政党，提出三民主义。","links":["e1901"]},
+  {"id":"e1911","year":1911,"era":"up","title":"辛亥革命","sign":"推翻清王朝、结束君主专制制度，建立共和；但未改变半殖民地半封建性质。","links":["e1905"]},
+  {"id":"e1912","year":1912,"era":"up","title":"中华民国成立","sign":"共和制度确立，但革命果实被袁世凯窃取。","links":["e1911"]},
+  {"id":"e1915","year":1915,"era":"up","title":"新文化运动","sign":"思想解放运动，为五四运动作了思想准备。","links":["e1912"]},
+  {"id":"e1919","year":1919,"era":"up","title":"五四运动","sign":"新民主主义革命的开端；工人阶级登上政治舞台。","links":["e1915"]},
+  {"id":"e1921","year":1921,"era":"mid","title":"中共一大","sign":"中国共产党成立，开天辟地的大事变；中国革命面貌焕然一新。","links":["e1919"]},
+  {"id":"e1922","year":1922,"era":"mid","title":"中共二大","sign":"第一次提出反帝反封建的民主革命纲领。","links":["e1921"]},
+  {"id":"e1924","year":1924,"era":"mid","title":"国共合作","sign":"国民党一大召开，第一次国共合作，大革命兴起。","links":["e1922"]},
+  {"id":"e1926","year":1926,"era":"mid","title":"北伐战争","sign":"基本推翻北洋军阀统治，但革命领导权问题未解决。","links":["e1924"]},
+  {"id":"e1927a","year":1927,"era":"mid","title":"大革命失败","sign":"国民党右派叛变，教训：必须掌握革命武装、坚持无产阶级领导权。","links":["e1926"]},
+  {"id":"e1927b","year":1927,"era":"mid","title":"南昌起义","sign":"打响武装反抗国民党反动派的第一枪。","links":["e1927a"]},
+  {"id":"e1927c","year":1927,"era":"mid","title":"八七会议","sign":"确定土地革命和武装反抗国民党反动派的总方针。","links":["e1927b"]},
+  {"id":"e1927d","year":1927,"era":"mid","title":"井冈山","sign":"开辟“农村包围城市、武装夺取政权”的革命道路。","links":["e1927c"]},
+  {"id":"e1929","year":1929,"era":"mid","title":"古田会议","sign":"思想建党、政治建军原则确立。","links":["e1927d"]},
+  {"id":"e1931","year":1931,"era":"mid","title":"九一八事变","sign":"局部抗战开始，民族矛盾上升。","links":["e1929"]},
+  {"id":"e1934","year":1934,"era":"mid","title":"长征开始","sign":"第五次反“围剿”失败后战略转移，保存革命火种。","links":["e1927d"]},
+  {"id":"e1935a","year":1935,"era":"mid","title":"遵义会议","sign":"生死攸关的转折点：确立毛泽东在党中央和红军的领导地位。","links":["e1934"]},
+  {"id":"e1935b","year":1935,"era":"mid","title":"一二·九运动","sign":"抗日救亡运动新高潮，促进抗日民族统一战线形成。","links":["e1931"]},
+  {"id":"e1936","year":1936,"era":"mid","title":"西安事变","sign":"和平解决，抗日民族统一战线初步形成。","links":["e1931","e1935b"]},
+  {"id":"e1937","year":1937,"era":"mid","title":"七七事变","sign":"全面抗战开始，中华民族空前团结。","links":["e1936"]},
+  {"id":"e1938","year":1938,"era":"mid","title":"《论持久战》发表","sign":"科学预判抗战三个阶段，指明抗战方向。","links":["e1937"]},
+  {"id":"e1942yz","year":1942,"era":"mid","title":"延安整风","sign":"反对主观主义、宗派主义、党八股，确立实事求是思想路线，为七大作思想准备。","links":["e1938"]},
+  {"id":"e1945b","year":1945,"era":"mid","title":"中共七大","sign":"毛泽东思想确立为党的指导思想，为抗战胜利后指明方向。","links":["e1945a"]},
+  {"id":"e1945a","year":1945,"era":"mid","title":"抗战胜利","sign":"近代以来中国反抗外敌入侵第一次取得完全胜利。","links":["e1938"]},
+  {"id":"e1946","year":1946,"era":"mid","title":"解放战争","sign":"推翻国民党统治，为新中国成立奠定基础。","links":["e1945b"]},
+  {"id":"e1948","year":1948,"era":"mid","title":"三大战役","sign":"战略决战，基本消灭国民党主力。","links":["e1946"]},
+  {"id":"e1949zx","year":1949,"era":"mid","tracks":["shi","mao"],"title":"政协第一届全体会议","sign":"通过《共同纲领》，起临时宪法作用；完成建国制度准备。","links":["e1945b"]},
+  {"id":"e1949","year":1949,"era":"mid","title":"中华人民共和国成立","sign":"新民主主义革命胜利，人民当家作主；中国历史进入新纪元。","links":["e1948"]},
+  {"id":"e1950","year":1950,"era":"d1","title":"抗美援朝","sign":"1950年10月25日，中国人民志愿军入朝作战，抗美援朝战争开始。","links":["e1949"]},
+  {"id":"e1953","year":1953,"era":"d1","title":"一五计划与三大改造","sign":"社会主义工业化起步，开始向社会主义过渡。","links":["e1949"]},
+  {"id":"e1954","year":1954,"era":"d1","title":"一届人大与宪法","sign":"人民代表大会制度确立，社会主义民主法制建设起步。","links":["e1953"]},
+  {"id":"e1956b","year":1956,"era":"d1","title":"中共八大","sign":"正确分析国内主要矛盾，提出集中力量发展生产力。","links":["e1956a"]},
+  {"id":"e1956a","year":1956,"era":"d1","title":"三大改造完成","sign":"社会主义制度基本建立，中国进入社会主义初级阶段。","links":["e1953"]},
+  {"id":"e1964","year":1964,"era":"d1","title":"两弹一星","sign":"科技国防重大突破，提升国际地位。","links":["e1956b"]},
+  {"id":"e1978","year":1978,"era":"d1","title":"十一届三中全会","sign":"伟大转折：确立解放思想、实事求是，改革开放的开端。","links":["e1956b"]},
+  {"id":"e1980","year":1980,"era":"d2","title":"经济特区","sign":"对外开放的窗口，“杀出一条血路”。","links":["e1978"]},
+  {"id":"e1992","year":1992,"era":"d2","title":"南方谈话与十四大","sign":"确立社会主义市场经济体制改革目标，改革开放进入新阶段。","links":["e1980"]},
+  {"id":"e1997","year":1997,"era":"d2","title":"香港回归与十五大","sign":"“一国两制”成功实践；邓小平理论写入党章。","links":["e1992"]},
+  {"id":"e2001","year":2001,"era":"d2","title":"加入WTO","sign":"深度融入世界经济，对外开放进入新阶段。","links":["e1997"]},
+  {"id":"e2003","year":2003,"era":"d2","title":"科学发展观","sign":"以人为本、全面协调可持续发展。","links":["e2001"]},
+  {"id":"e2012","year":2012,"era":"d2","title":"十八大","sign":"中国特色社会主义进入新时代。","links":["e2003"]},
+  {"id":"e2013sj","year":2013,"era":"new","tracks":["shi","mao"],"title":"十八届三中全会","sign":"全面深化改革总目标：完善和发展中国特色社会主义制度、推进国家治理体系和治理能力现代化。","links":["e2012"]},
+  {"id":"e2014sj","year":2014,"era":"new","tracks":["shi","mao"],"title":"十八届四中全会","sign":"全面依法治国总目标：建设中国特色社会主义法治体系、建设社会主义法治国家。","links":["e2013sj"]},
+  {"id":"e2015sj","year":2015,"era":"new","tracks":["shi","mao"],"title":"十八届五中全会","sign":"正式提出创新、协调、绿色、开放、共享的新发展理念。","links":["e2014sj"]},
+  {"id":"e2016sj","year":2016,"era":"new","tracks":["shi","mao"],"title":"十八届六中全会","sign":"正式确立习近平同志党中央的核心、全党的核心地位。","links":["e2015sj"]},
+  {"id":"e2017","year":2017,"era":"new","title":"十九大","sign":"确立习近平新时代中国特色社会主义思想为党的指导思想。","links":["e2012"]},
+  {"id":"e2018","year":2018,"era":"new","tracks":["shi","mao"],"title":"2018年修宪","sign":"十三届全国人大一次会议通过宪法修正案，将习近平新时代中国特色社会主义思想载入宪法。","links":["e2017"]},
+  {"id":"e2021","year":2021,"era":"new","title":"建党百年 · 全面小康","sign":"第一个百年奋斗目标实现，历史性解决绝对贫困。","links":["e2017"]},
+  {"id":"e2021lj","year":2021,"era":"new","tracks":["shi","mao"],"title":"十九届六中全会","sign":"通过第三个历史决议，确立“两个确立”的决定性意义。","links":["e2017"]},
+  {"id":"e2022","year":2022,"era":"new","title":"二十大","sign":"以中国式现代化全面推进中华民族伟大复兴。","links":["e2021"]}
+];
+
+// 史纲中同时属于毛中特线的事件（不重复造节点）
+const MAO_REUSE = ['e1921','e1922','e1927c','e1935a','e1938','e1945b','e1954','e1956b','e1978','e1992','e2003','e2012','e2017','e2022'];
+EVENTS.forEach(e => { if (MAO_REUSE.includes(e.id)) e.tracks = ['shi','mao']; });
+
+// 毛中特专属：会议 + 著作 + 理论成果
+
+const EVENT_DATE = {
+  "e1840": [6, 28],
+  "e1842": [8, 29],
+  "e1851": [1, 11],
+  "e1856": [10, 23],
+  "e1860bj": [10, 24],
+  "e1861": [1, 20],
+  "e1864nw": [10, 7],
+  "e1864tj": [7, 19],
+  "e1865jn": [9, 20],
+  "e1866fz": [12, 23],
+  "e1872zs": [12, 26],
+  "e1874tw": [5, 8],
+  "e1876yt": [9, 13],
+  "e1881yl": [2, 24],
+  "e1883zf": [12, 1],
+  "e1884xj": [11, 18],
+  "e1885tw": [10, 12],
+  "e1888bh": [9, 1],
+  "e1890hy": [5, 1],
+  "e1894": [7, 25],
+  "e1895": [4, 17],
+  "e1898": [6, 11],
+  "e1900": [6, 0],
+  "e1901": [9, 7],
+  "e1905": [8, 20],
+  "e1911": [10, 10],
+  "e1912": [1, 1],
+  "e1915": [9, 15],
+  "e1919": [5, 4],
+  "e1921": [7, 23],
+  "e1922": [7, 16],
+  "e1924": [1, 20],
+  "e1926": [7, 9],
+  "e1927a": [4, 12],
+  "e1927b": [8, 1],
+  "e1927c": [8, 7],
+  "e1927d": [10, 27],
+  "e1929": [12, 28],
+  "e1931": [9, 18],
+  "e1934": [10, 10],
+  "e1935a": [1, 15],
+  "e1935b": [12, 9],
+  "e1936": [12, 12],
+  "e1937": [7, 7],
+  "e1938": [5, 26],
+  "e1942yz": [2, 1],
+  "e1945a": [8, 15],
+  "e1945b": [4, 23],
+  "e1946": [6, 26],
+  "e1948": [9, 12],
+  "e1949": [10, 1],
+  "e1949zx": [9, 21],
+  "e1950": [10, 25],
+  "e1954": [9, 15],
+  "e1956a": [12, 1],
+  "e1956b": [9, 15],
+  "e1964": [10, 16],
+  "e1978": [12, 18],
+  "e1980": [8, 26],
+  "e1992": [1, 18],
+  "e1997": [7, 1],
+  "e2001": [12, 11],
+  "e2003": [10, 11],
+  "e2012": [11, 8],
+  "e2013sj": [11, 9],
+  "e2014sj": [10, 20],
+  "e2015sj": [10, 26],
+  "e2016sj": [10, 24],
+  "e2017": [10, 18],
+  "e2018": [3, 11],
+  "e2021": [7, 1],
+  "e2021lj": [11, 8],
+  "e2022": [10, 16],
+  "m1923": [6, 12],
+  "m1925a": [1, 11],
+  "m1925b": [12, 1],
+  "m1927a": [4, 27],
+  "m1927b": [3, 5],
+  "m1928": [6, 18],
+  "m1935c": [12, 17],
+  "m1937c": [8, 22],
+  "m1938b": [9, 29],
+  "m1940": [1, 1],
+  "m1945c": [4, 24],
+  "m1949a": [3, 5],
+  "m1949b": [6, 30],
+  "m1956c": [4, 25],
+  "m1957": [2, 27],
+  "m1982": [9, 1],
+  "m1987": [10, 25],
+  "m1997b": [9, 12],
+  "m2002": [11, 8],
+  "m2007": [10, 15],
+  "p2": [9, 14],
+  "p3": [6, 3]
+};
+function eventWhen(ev){
+  const d = EVENT_DATE[ev.id];
+  if (!d) return ev.when || String(ev.year);
+  return ev.year + '年' + d[0] + '月' + (d[1] ? d[1] + '日' : '');
+}
+
+const MAO_EVENTS = [
+  {"id":"m1923","year":1923,"era":"mao","shiEra":"mid","tracks":["shi","mao"],"title":"中共三大","sign":"决定共产党员以个人身份加入国民党，推动第一次国共合作。","links":["e1922"]},
+  {"id":"m1925a","year":1925,"era":"mao","track":"mao","title":"中共四大","sign":"提出无产阶级在民主革命中的领导权和工农联盟问题。","links":["m1923"]},
+  {"id":"m1925b","year":1925,"era":"mao","track":"mao","title":"《中国社会各阶级的分析》","sign":"分清敌友是革命的首要问题；无产阶级是领导力量。","links":["m1925a"]},
+  {"id":"m1927b","year":1927,"era":"mao","track":"mao","title":"《湖南农民运动考察报告》","sign":"充分肯定农民运动，强调农民问题是中国革命的中心问题。","links":["m1927a"]},
+  {"id":"m1927a","year":1927,"era":"mao","track":"mao","title":"中共五大","sign":"批评陈独秀右倾错误，但未能提出挽救革命的正确方针。","links":["e1926"]},
+  {"id":"m1928","year":1928,"era":"mao","track":"mao","title":"中共六大","sign":"唯一一次在国外召开的党代会，分析革命低潮形势。","links":["e1927c"]},
+  {"id":"m1930a","year":1930,"era":"mao","track":"mao","title":"《星星之火，可以燎原》","sign":"提出“农村包围城市、武装夺取政权”道路，反对悲观思想。","links":["e1929"]},
+  {"id":"m1930b","year":1930,"era":"mao","track":"mao","title":"《反对本本主义》","sign":"“没有调查，没有发言权”，反对教条主义。","links":["m1930a"]},
+  {"id":"m1935c","year":1935,"era":"mao","track":"mao","title":"瓦窑堡会议","sign":"确定建立抗日民族统一战线的策略方针。","links":["e1935a"]},
+  {"id":"m1937c","year":1937,"era":"mao","shiEra":"mid","tracks":["shi","mao"],"title":"洛川会议","sign":"制定全面抗战路线，通过《抗日救国十大纲领》，强调发动群众、独立自主的游击战争。","links":["e1937"]},
+  {"id":"m1937a","year":1937,"era":"mao","track":"mao","title":"《实践论》","sign":"阐明认识与实践的关系，批判教条主义与经验主义。","links":["m1935c"]},
+  {"id":"m1937b","year":1937,"era":"mao","track":"mao","title":"《矛盾论》","sign":"阐明矛盾普遍性与特殊性，奠定马克思主义中国化的哲学基础。","links":["m1937a"]},
+  {"id":"m1938b","year":1938,"era":"mao","shiEra":"mid","tracks":["shi","mao"],"title":"六届六中全会","sign":"首次提出“马克思主义中国化”命题，维护抗日民族统一战线。","links":["m1937c"]},
+  {"id":"m1940","year":1940,"era":"mao","track":"mao","title":"《新民主主义论》","sign":"系统阐述新民主主义革命理论，明确革命两步走。","links":["e1938"]},
+  {"id":"m1945c","year":1945,"era":"mao","track":"mao","title":"《论联合政府》","sign":"提出废止国民党一党专政、建立民主联合政府的主张。","links":["e1945b"]},
+  {"id":"m1949a","year":1949,"era":"mao","track":"mao","title":"七届二中全会","sign":"工作重心由乡村转向城市；提出“两个务必”。","links":["e1949"]},
+  {"id":"m1949b","year":1949,"era":"mao","track":"mao","title":"《论人民民主专政》","sign":"总结革命经验，阐明人民民主专政理论。","links":["m1949a"]},
+  {"id":"m1956c","year":1956,"era":"mao","track":"mao","title":"《论十大关系》","sign":"以苏联经验为鉴，提出调动一切积极因素建设社会主义。","links":["e1956b"]},
+  {"id":"m1957","year":1957,"era":"mao","track":"mao","title":"《关于正确处理人民内部矛盾的问题》","sign":"区分两类不同性质矛盾，提出正确处理人民内部矛盾的方法。","links":["m1956c"]},
+  {"id":"m1982","year":1982,"era":"mao","track":"mao","title":"中共十二大","sign":"提出“建设有中国特色的社会主义”命题。","links":["e1978"]},
+  {"id":"m1987","year":1987,"era":"mao","track":"mao","title":"中共十三大","sign":"系统阐述社会主义初级阶段理论，提出“一个中心、两个基本点”。","links":["m1982"]},
+  {"id":"m1997b","year":1997,"era":"mao","track":"mao","title":"中共十五大","sign":"邓小平理论写入党章，确立为党的指导思想。","links":["e1992"]},
+  {"id":"m2002","year":2002,"era":"mao","track":"mao","title":"中共十六大","sign":"“三个代表”重要思想写入党章。","links":["m1997b"]},
+  {"id":"m2007","year":2007,"era":"mao","track":"mao","title":"中共十七大","sign":"科学发展观写入党章。","links":["m2002"]}
+];
+EVENTS.push(...MAO_EVENTS);
+
+/* ===================== 地点数据 ===================== */
+const LOC = {
+  p1:{lon:0.12,lat:51.5,place:'伦敦',world:true},
+  p2:{lon:116.4,lat:39.9,place:'北京'},
+  p3:{lon:113.67,lat:22.81,place:'虎门'},
+  e1840:{lon:113.67,lat:22.81,place:'虎门'},
+  e1842:{lon:118.78,lat:32.06,place:'南京'},
+  e1851:{lon:110.0,lat:23.4,place:'金田'},
+  e1856:{lon:113.26,lat:23.13,place:'广州'},
+  e1861:{lon:121.47,lat:31.23,place:'上海'},
+  e1860bj:{lon:116.4,lat:39.9,place:'北京'},
+  e1864tj:{lon:118.78,lat:32.06,place:'南京'},
+  e1864nw:{lon:82.98,lat:46.75,place:'塔城'},
+  e1874tw:{lon:120.75,lat:22.0,place:'恒春'},
+  e1876xj:{lon:87.62,lat:43.82,place:'乌鲁木齐'},
+  e1865jn:{lon:121.47,lat:31.23,place:'上海'},
+  e1866fz:{lon:119.30,lat:26.08,place:'福州'},
+  e1872zs:{lon:121.47,lat:31.23,place:'上海'},
+  e1884xj:{lon:87.62,lat:43.82,place:'乌鲁木齐'},
+  e1890hy:{lon:114.30,lat:30.60,place:'武汉'},
+  e1876yt:{lon:121.39,lat:37.54,place:'烟台'},
+  e1881yl:{lon:81.32,lat:43.92,place:'伊犁'},
+  e1883zf:{lon:106.72,lat:22.10,place:'镇南关'},
+  e1885tw:{lon:121.56,lat:25.04,place:'台北'},
+  e1888bh:{lon:122.12,lat:37.51,place:'威海'},
+  e1894:{lon:122.12,lat:37.51,place:'威海'},
+  e1895:{lon:130.95,lat:33.95,place:'马关',world:true},
+  e1898:{lon:116.4,lat:39.9,place:'北京'},
+  e1900:{lon:116.4,lat:39.9,place:'北京'},
+  e1901:{lon:116.4,lat:39.9,place:'北京'},
+  e1905:{lon:139.7,lat:35.7,place:'东京',world:true},
+  e1911:{lon:114.3,lat:30.6,place:'武昌'},
+  e1912:{lon:118.78,lat:32.06,place:'南京'},
+  e1915:{lon:116.4,lat:39.9,place:'北京'},
+  e1919:{lon:116.4,lat:39.9,place:'北京'},
+  e1921:{lon:121.47,lat:31.23,place:'上海'},
+  e1922:{lon:121.47,lat:31.23,place:'上海'},
+  e1924:{lon:113.26,lat:23.13,place:'广州'},
+  e1926:{lon:113.26,lat:23.13,place:'广州'},
+  e1927a:{lon:121.47,lat:31.23,place:'上海'},
+  e1927b:{lon:115.89,lat:28.68,place:'南昌'},
+  e1927c:{lon:114.3,lat:30.6,place:'汉口'},
+  e1927d:{lon:114.17,lat:26.57,place:'井冈山'},
+  e1929:{lon:116.8,lat:25.2,place:'古田'},
+  e1931:{lon:123.43,lat:41.8,place:'沈阳'},
+  e1934:{lon:116.03,lat:25.89,place:'瑞金'},
+  e1935a:{lon:106.93,lat:27.7,place:'遵义'},
+  e1935b:{lon:116.4,lat:39.9,place:'北京'},
+  e1936:{lon:108.94,lat:34.34,place:'西安'},
+  e1937:{lon:116.2,lat:39.85,place:'卢沟桥'},
+  e1938:{lon:109.49,lat:36.59,place:'延安'},
+  e1945a:{lon:118.78,lat:32.06,place:'南京'},
+  e1945b:{lon:109.49,lat:36.59,place:'延安'},
+  e1946:{lon:114.4,lat:31.8,place:'宣化店'},
+  e1948:{lon:117.28,lat:34.26,place:'徐州'},
+  e1949:{lon:116.4,lat:39.9,place:'北京'},
+  e1953:{lon:116.4,lat:39.9,place:'北京'},
+  e1954:{lon:116.4,lat:39.9,place:'北京'},
+  e1956a:{lon:116.4,lat:39.9,place:'北京'},
+  e1956b:{lon:116.4,lat:39.9,place:'北京'},
+  e1964:{lon:90.3,lat:40.5,place:'罗布泊'},
+  e1978:{lon:116.4,lat:39.9,place:'北京'},
+  e1980:{lon:114.06,lat:22.55,place:'深圳'},
+  e1992:{lon:114.06,lat:22.55,place:'深圳'},
+  e1997:{lon:114.17,lat:22.32,place:'香港'},
+  e2001:{lon:6.14,lat:46.2,place:'日内瓦',world:true},
+  e2003:{lon:116.4,lat:39.9,place:'北京'},
+  e2012:{lon:116.4,lat:39.9,place:'北京'},
+  e2017:{lon:116.4,lat:39.9,place:'北京'},
+  e2021:{lon:116.4,lat:39.9,place:'北京'},
+  e2022:{lon:116.4,lat:39.9,place:'北京'},
+  m1923:{lon:113.26,lat:23.13,place:'广州'},
+  m1925a:{lon:121.47,lat:31.23,place:'上海'},
+  m1925b:{lon:121.47,lat:31.23,place:'上海'},
+  m1927a:{lon:114.3,lat:30.6,place:'武汉'},
+  m1927b:{lon:112.98,lat:28.2,place:'长沙'},
+  m1928:{lon:37.6,lat:55.75,place:'莫斯科',world:true},
+  m1930a:{lon:116.03,lat:25.89,place:'瑞金'},
+  m1930b:{lon:115.65,lat:24.95,place:'寻乌'},
+  m1935c:{lon:109.5,lat:37.1,place:'瓦窑堡'},
+  m1937a:{lon:109.49,lat:36.59,place:'延安'},
+  m1937b:{lon:109.49,lat:36.59,place:'延安'},
+  m1937c:{lon:109.4,lat:35.8,place:'洛川'},
+  m1938b:{lon:109.49,lat:36.59,place:'延安'},
+  e1942yz:{lon:109.49,lat:36.59,place:'延安'},
+  e1949zx:{lon:116.4,lat:39.9,place:'北京'},
+  e2013sj:{lon:116.4,lat:39.9,place:'北京'},
+  e2014sj:{lon:116.4,lat:39.9,place:'北京'},
+  e2015sj:{lon:116.4,lat:39.9,place:'北京'},
+  e2021lj:{lon:116.4,lat:39.9,place:'北京'},
+  m1940:{lon:109.49,lat:36.59,place:'延安'},
+  m1945c:{lon:109.49,lat:36.59,place:'延安'},
+  m1949a:{lon:114.0,lat:38.3,place:'西柏坡'},
+  m1949b:{lon:116.4,lat:39.9,place:'北京'},
+  m1956c:{lon:116.4,lat:39.9,place:'北京'},
+  m1957:{lon:116.4,lat:39.9,place:'北京'},
+  m1982:{lon:116.4,lat:39.9,place:'北京'},
+  m1987:{lon:116.4,lat:39.9,place:'北京'},
+  m1997b:{lon:116.4,lat:39.9,place:'北京'},
+  m2002:{lon:116.4,lat:39.9,place:'北京'},
+  m2007:{lon:116.4,lat:39.9,place:'北京'},
+  e1950:{lon:124.4,lat:40.1,place:'鸭绿江'},
+  e2016sj:{lon:116.4,lat:39.9,place:'北京'},
+  e2018:{lon:116.4,lat:39.9,place:'北京'}
+};
+EVENTS.forEach(e => { if (LOC[e.id]) e.loc = LOC[e.id]; });
+MAO_EVENTS.forEach(e => { if (LOC[e.id]) e.loc = LOC[e.id]; });
+const REGION = {
+  '伦敦':'英国','北京':'北京','虎门':'广东','广州':'广东','南京':'江苏','金田':'广西','上海':'上海',
+  '威海':'山东','马关':'日本','东京':'日本','武昌':'湖北','南昌':'江西','汉口':'湖北','井冈山':'江西',
+  '古田':'福建','沈阳':'辽宁','瑞金':'江西','遵义':'贵州','西安':'陕西','卢沟桥':'北京','延安':'陕西',
+  '塔城':'新疆','恒春':'台湾','乌鲁木齐':'新疆','烟台':'山东','伊犁':'新疆','镇南关':'广西','台北':'台湾',
+  '福州':'福建','武汉':'湖北',
+  '长沙':'湖南','寻乌':'江西','瓦窑堡':'陕西','洛川':'陕西','西柏坡':'河北','莫斯科':'俄罗斯',
+  '徐州':'江苏','罗布泊':'新疆','深圳':'广东','香港':'香港','日内瓦':'瑞士'
+};
+Object.values(LOC).forEach(o => { o.region = REGION[o.place] || ''; });
+
+/* 精确到月/日的时间标注 */
+const WHEN = {
+  p1:'1760年', p2:'1793年', p3:'1839年6月',
+  e1840:'1840年6月', e1842:'1842年8月', e1851:'1851年1月', e1856:'1856年10月', e1861:'1861年', e1860bj:'1860年10月', e1864tj:'1864年7月', e1864nw:'1864年10月',
+  e1865jn:'1865年', e1866fz:'1866年', e1872zs:'1872年', e1874tw:'1874年5月',
+  e1876xj:'1876年', e1876yt:'1876年9月', e1881yl:'1881年2月', e1884xj:'1884年', e1890hy:'1890年',
+  e1883zf:'1883年12月', e1885tw:'1885年10月', e1888bh:'1888年',
+  e1894:'1894年7月', e1895:'1895年4月', e1898:'1898年6月', e1900:'1900年', e1901:'1901年9月',
+  e1905:'1905年8月', e1911:'1911年10月', e1912:'1912年1月', e1915:'1915年9月', e1919:'1919年5月',
+  e1921:'1921年7月', e1922:'1922年7月', e1924:'1924年1月', e1926:'1926年7月', e1927a:'1927年4月',
+  e1927b:'1927年8月1日', e1927c:'1927年8月7日', e1927d:'1927年10月', e1929:'1929年12月',
+  e1931:'1931年9月18日', e1934:'1934年10月', e1935a:'1935年1月', e1935b:'1935年12月9日',
+  e1936:'1936年12月12日', e1937:'1937年7月7日', e1938:'1938年5月', e1945a:'1945年9月2日',
+  e1945b:'1945年4月', e1946:'1946年6月', e1948:'1948年9月', e1949:'1949年10月1日',
+  e1953:'1953年', e1954:'1954年9月', e1956a:'1956年底', e1956b:'1956年9月', e1964:'1964年10月16日',
+  e1978:'1978年12月', e1980:'1980年8月', e1992:'1992年1月', e1997:'1997年7月1日', e2001:'2001年12月11日',
+  e2003:'2003年', e2012:'2012年11月', e2017:'2017年10月', e2021:'2021年7月1日', e2022:'2022年10月',
+  m1923:'1923年6月', m1925a:'1925年1月', m1925b:'1925年12月', m1927a:'1927年4月',
+  m1927b:'1927年3月', m1928:'1928年6月', m1930a:'1930年1月', m1930b:'1930年5月',
+  m1935c:'1935年12月', m1937a:'1937年7月', m1937b:'1937年8月', m1937c:'1937年8月',
+  m1938b:'1938年9月', m1940:'1940年1月', m1945c:'1945年4月', m1949a:'1949年3月',
+  e1942yz:'1942年起', e1949zx:'1949年9月', e2013sj:'2013年11月', e2014sj:'2014年10月',
+  e2015sj:'2015年10月', e2021lj:'2021年11月',
+  m1949b:'1949年6月', m1956c:'1956年4月', m1957:'1957年2月', m1982:'1982年9月',
+  m1987:'1987年10月', m1997b:'1997年9月', m2002:'2002年11月', m2007:'2007年10月'
+};
+EVENTS.forEach(e => { if (WHEN[e.id]) e.when = WHEN[e.id]; });
+
+/* 长征路线（时间用小数年表示） */
+const LONG_MARCH = [
+  {t:1934.79, lon:116.03, lat:25.89, name:'瑞金出发'},
+  {t:1934.88, lon:111.00, lat:25.80, name:'湘江战役'},
+  {t:1934.96, lon:109.78, lat:26.16, name:'通道转兵'},
+  {t:1935.00, lon:109.14, lat:26.23, name:'黎平会议'},
+  {t:1935.04, lon:106.93, lat:27.70, name:'遵义会议'},
+  {t:1935.09, lon:105.80, lat:28.40, name:'一渡赤水'},
+  {t:1935.12, lon:105.40, lat:27.80, name:'扎西整编'},
+  {t:1935.18, lon:106.80, lat:27.90, name:'娄山关'},
+  {t:1935.25, lon:106.40, lat:27.85, name:'三渡赤水'},
+  {t:1935.35, lon:102.50, lat:26.60, name:'巧渡金沙江'},
+  {t:1935.40, lon:102.25, lat:26.65, name:'会理'},
+  {t:1935.45, lon:102.17, lat:28.55, name:'彝海结盟'},
+  {t:1935.48, lon:102.30, lat:29.40, name:'强渡大渡河'},
+  {t:1935.50, lon:102.23, lat:29.91, name:'飞夺泸定桥'},
+  {t:1935.55, lon:102.70, lat:30.90, name:'翻越夹金山'},
+  {t:1935.58, lon:102.36, lat:30.99, name:'懋功会师'},
+  {t:1935.65, lon:102.50, lat:31.60, name:'两河口'},
+  {t:1935.72, lon:103.00, lat:32.70, name:'毛儿盖'},
+  {t:1935.78, lon:103.40, lat:32.90, name:'过松潘草地'},
+  {t:1935.82, lon:103.60, lat:34.20, name:'腊子口'},
+  {t:1935.85, lon:104.40, lat:34.20, name:'哈达铺'},
+  {t:1935.87, lon:105.00, lat:35.20, name:'榜罗镇'},
+  {t:1935.92, lon:108.20, lat:36.90, name:'吴起镇会师'},
+  {t:1936.50, lon:105.05, lat:35.70, name:'会宁会师'},
+  {t:1936.78, lon:105.70, lat:35.90, name:'将台堡会师'}
+];
+
+/* ===================== 清代疆域与割地 ===================== */
+const QING_FILL = '#7a5f3c', QING_STROKE = '#b08a55';
+
+
+/* ===================== 领土得失弹窗 ===================== */
+const TERRITORY = [
+  {y:1858, type:'loss', title:'《瑷珲条约》', detail:'割让黑龙江以北、外兴安岭以南约 60 万平方公里', lossKey:'', at:[127.5,50.3]},
+  {y:1860, type:'loss', title:'《北京条约》', detail:'割让乌苏里江以东（含库页岛）约 40 万平方公里', lossKey:'', at:[135.0,48.0]},
+  {y:1864, type:'loss', title:'《勘分西北界约记》', detail:'割让巴尔喀什湖以东以南约 44 万平方公里', lossKey:'', at:[74.5,42.0]},
+  {y:1881, type:'gain', title:'《伊犁条约》', detail:'收回伊犁九城及特克斯河谷', gain:['ili'], at:[81.3,43.9]},
+  {y:1895, type:'loss', title:'《马关条约》', detail:'割让台湾、澎湖列岛给日本', lossKey:'', at:[121.0,23.7]},
+  {y:1898, type:'lease', title:'列强强租港湾', detail:'胶州湾、旅大、威海卫、新界被强租（未割让但实际控制）', at:[120.3,36.1]},
+  {y:1912, type:'era', title:'中华民国成立', detail:'清朝灭亡，地图进入民国时期', at:[116.4,39.9]},
+  {y:1945, type:'gain', title:'抗战胜利', detail:'东北、台湾、澎湖光复，回到中国版图', gain:['taiwan','northeast'], at:[121.0,23.7]},
+  {y:1946, type:'loss', title:'外蒙古独立', detail:'外蒙古脱离中国版图', lossKey:'mongolia', at:[106.0,47.0]},
+  {y:1949, type:'era', title:'中华人民共和国成立', detail:'进入新中国时期，现代版图逐步定型', at:[116.4,39.9]},
+  {y:1950, type:'gain', title:'《中苏友好同盟互助条约》', detail:'苏联承诺归还中长铁路、旅顺口和大连', at:[121.6,38.8]},
+  {y:1952, type:'gain', title:'中长铁路移交', detail:'苏联将中长铁路移交中国', at:[125.3,43.9]},
+  {y:1955, type:'gain', title:'旅顺口回归', detail:'苏军撤离旅顺口，旅大地区完全回归', gain:['ludai'], at:[121.2,38.8]},
+  {y:1997, type:'gain', title:'香港回归', detail:'中国恢复对香港行使主权', gain:['hongkong'], at:[114.17,22.32]},
+  {y:1999, type:'gain', title:'澳门回归', detail:'中国恢复对澳门行使主权', gain:['macau'], at:[113.55,22.19]}
+];
+
+/* ===================== 军阀割据格局（省界近似） ===================== */
+const WARLORD_PHASES = window.WARLORD_PHASES || [];
+
+/* ===================== 视图常量 ===================== */
+const svg = document.getElementById('svg');
+const playBtn = document.getElementById('playBtn');
+const speedSel = document.getElementById('speedSel');
+const dirBtn = document.getElementById('dirBtn');
+const dwellChk = document.getElementById('dwellChk');
+const bigYear = document.getElementById('bigYear');
+const eraName = document.getElementById('eraName');
+const titleBubble = document.getElementById('titleBubble');
+const detailBubble = document.getElementById('detailBubble');
+const tbYear = document.getElementById('tbYear'), tbName = document.getElementById('tbName');
+const dbEra = document.getElementById('dbEra'), dbYear = document.getElementById('dbYear');
+const dbSign = document.getElementById('dbSign'), dbRel = document.getElementById('dbRel');
+const track = document.getElementById('track'), thumb = document.getElementById('thumb');
+
+let W = 0, H = 0, axisY = 0;
+let currentYear = 1750;
+let playing = true;
+let speedMul = 1;
+let dir = 1;
+let dwellEnabled = true;
+let tween = null;
+let activeId = null;
+let dragging = false, dragStartX = 0, dragStartYear = 0, wasPlaying = false, moved = 0;
+let nodes = {};       // id -> {dot, ev, g}
+let TICKS = [];
+let ERABARS = [];
+let ERALABELS = [];
+let PPY = 14;
+let activeTrack = 'shi';
+let factionMode = true;
+let showFactionNames = false;
+let persistLabels = false;
+let questEnabled = true;
+let questEventId = null;
+let axisZoom = 1;
+function inTrack(ev, tr){ if (tr === 'all') return true; return (ev.tracks || [ev.track || 'shi']).includes(tr); }
+
+let labelEls = [];    // {ev, el}
+let lastTs = 0;
+
+/* ===================== 地图 ===================== */
+const mapSvg = document.getElementById('mapBg');
+const mapSub = document.getElementById('mapSub');
+const mapFootL = document.getElementById('mapFootL');
+const mapFootR = document.getElementById('mapFootR');
+const mapChk = document.getElementById('mapChk');
+const mapFade = document.getElementById('mapFade');
+const mapVeil = document.getElementById('mapVeil');
+const CH = {lon0:73, lat1:54, k:12};                 // 中国：73–135E, 18–54N
+function cproj(lon,lat){ return [(lon-CH.lon0)*CH.k, (CH.lat1-lat)*CH.k]; }   // 744 x 432
+const WD = {lon0:-180, lat1:85, k:4.6};              // 世界：-180–180, -60–85
+function wproj(lon,lat){ return [(lon-WD.lon0)*WD.k, (WD.lat1-lat)*WD.k]; }   // 1656 x 667
+
+const MAP = {
+  mode:'china',
+  view:{cx:372, cy:216, w:744},
+  goal:{cx:372, cy:216, w:744},
+  route:false,
+  groups:{},
+  lastFocus:null,
+  lastRoute:null,
+  lastFocusYear:null,
+  terrHoldUntil:0,
+  forceFly:false,
+  transitioning:false
+};
+const ROUTE_PTS = LONG_MARCH.map(p => { const q = cproj(p.lon, p.lat); return {x:q[0], y:q[1], t:p.t, name:p.name}; });
+let mapSnap = false;
+let mapHoldUntil = 0;
+let terrTriggered = new Set();
+let terrPopupTimer = null;
+
+function svgEl(tag, attrs){
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+function featPath(f, proj){
+  let d = '';
+  for (const poly of f.p){
+    for (const ring of poly){
+      for (let i=0; i<ring.length; i++){
+        const q = proj(ring[i][0], ring[i][1]);
+        d += (i ? 'L' : 'M') + q[0].toFixed(1) + ',' + q[1].toFixed(1);
+      }
+      d += 'Z';
+    }
+  }
+  return d;
+}
+function fullRoutePath(){
+  let d = '';
+  ROUTE_PTS.forEach((p,i) => { d += (i ? 'L' : 'M') + p.x.toFixed(1) + ',' + p.y.toFixed(1); });
+  return d;
+}
+function routeInterp(t){
+  const pts = ROUTE_PTS;
+  if (t <= pts[0].t) return {x:pts[0].x, y:pts[0].y, seg:0, d:'M'+pts[0].x+','+pts[0].y};
+  let d = 'M' + pts[0].x + ',' + pts[0].y;
+  for (let i=1; i<pts.length; i++){
+    if (pts[i].t <= t){
+      d += 'L' + pts[i].x + ',' + pts[i].y;
+    } else {
+      const a = pts[i-1], b = pts[i];
+      const f = clamp((t-a.t)/(b.t-a.t), 0, 1);
+      const x = a.x + (b.x-a.x)*f, y = a.y + (b.y-a.y)*f;
+      d += 'L' + x.toFixed(1) + ',' + y.toFixed(1);
+      return {x, y, seg:i, d};
+    }
+  }
+  const last = pts[pts.length-1];
+  return {x:last.x, y:last.y, seg:pts.length-1, d};
+}
+function routeBounds(){
+  let minx=1e9, maxx=-1e9, miny=1e9, maxy=-1e9;
+  ROUTE_PTS.forEach(p => { minx=Math.min(minx,p.x); maxx=Math.max(maxx,p.x); miny=Math.min(miny,p.y); maxy=Math.max(maxy,p.y); });
+  const ratio = 432/744;
+  let w = Math.max(maxx-minx, (maxy-miny)/ratio) * 1.5;
+  w = Math.max(w, 240);
+  return {cx:(minx+maxx)/2, cy:(miny+maxy)/2, w};
+}
+function polyPath(points, proj){
+  let d = '';
+  points.forEach((p,i) => { const q = proj(p[0], p[1]); d += (i ? 'L' : 'M') + q[0].toFixed(1) + ',' + q[1].toFixed(1); });
+  return d + 'Z';
+}
+function ringCentroid(f){
+  const ring = f.p && f.p[0] && f.p[0][0];
+  if (!ring) return [0,0];
+  let sx = 0, sy = 0;
+  ring.forEach(p => { sx += p[0]; sy += p[1]; });
+  return [sx/ring.length, sy/ring.length];
+}
+function continentColor(lon, lat){
+  if (lat < -58) return '#2a323a';
+  if (lon >= -25 && lon <= 60 && lat >= 35) return '#2b4058';
+  if (lon >= -20 && lon <= 55 && lat < 35) return '#3a3a2f';
+  if (lon >= -170 && lon <= -50 && lat >= 12) return '#2f3a45';
+  if (lon >= -85 && lon <= -30 && lat < 12) return '#33443a';
+  if (lon >= 110 && lon <= 180 && lat < 0) return '#3a3345';
+  return '#2b3a4f';
+}
+function fullView(mode){
+  return mode === 'world' ? {cx:828, cy:333, w:1656} : {cx:372, cy:216, w:744};
+}
+function initMap(){
+  const svg = mapSvg;
+  svg.innerHTML = '';
+  MAP.defs = svgEl('defs', {});
+  svg.appendChild(MAP.defs);
+  // ---------- 世界地图（大洲色块） ----------
+  MAP.groups.world = svgEl('g', {id:'mapWorld'});
+  (window.WORLD_MAP||[]).forEach(f => {
+    const c = ringCentroid(f);
+    MAP.groups.world.appendChild(svgEl('path', {
+      d: featPath(f, wproj), fill: continentColor(c[0], c[1]), stroke:'#46607c',
+      'stroke-width':1, 'stroke-linejoin':'round', 'vector-effect':'non-scaling-stroke'
+    }));
+  });
+  svg.appendChild(MAP.groups.world);
+
+  // ---------- 中国：现代底图 + 清代阶段图层 ----------
+  MAP.groups.chinaAll = svgEl('g', {id:'mapChinaAll'});
+  MAP.groups.base = svgEl('g', {});
+  MAP.groups.taiwanBase = svgEl('g', {});
+  MAP.groups.qingLost = svgEl('g', {});
+  MAP.groups.qingNow = svgEl('g', {});
+  MAP.groups.taiwanQing = svgEl('g', {});
+  MAP.groups.taiping = svgEl('g', {id:'mapTaiping'});
+  MAP.provincePaths = {};
+  (window.CHINA_MAP||[]).forEach(f => {
+    const isTW = /台湾/.test(f.n || '');
+    const path = svgEl('path', {d: featPath(f, cproj), fill:'#223a50', stroke:'#3b5f7d',
+      'stroke-width':1, 'stroke-linejoin':'round', 'vector-effect':'non-scaling-stroke'});
+    if (isTW) MAP.groups.taiwanBase.appendChild(path);
+    else MAP.groups.base.appendChild(path);
+    MAP.provincePaths[f.n] = path;
+  });
+
+  MAP.qingLostPath = svgEl('path', {fill:'#ff2e63', stroke:'#ffe066', 'stroke-width':2, 'stroke-dasharray':'4 3', 
+    'stroke-linejoin':'round', 'vector-effect':'non-scaling-stroke', opacity:'0'});
+  MAP.groups.qingLost.appendChild(MAP.qingLostPath);
+  MAP.qingNowPath = svgEl('path', {fill:QING_FILL, stroke:QING_STROKE, 'stroke-width':1.1, 
+    'stroke-linejoin':'round', 'vector-effect':'non-scaling-stroke', opacity:'.92'});
+  MAP.groups.qingNow.appendChild(MAP.qingNowPath);
+  const twPath = (window.CHINA_MAP||[]).filter(f => /台湾/.test(f.n||'')).map(f => featPath(f, cproj)).join('');
+  MAP.taiwanQingPath = svgEl('path', {d:twPath, fill:QING_FILL, stroke:QING_STROKE,
+    'stroke-width':1, 'stroke-linejoin':'round', 'vector-effect':'non-scaling-stroke', opacity:'0'});
+  MAP.groups.taiwanQing.appendChild(MAP.taiwanQingPath);
+  MAP.taipingPath = svgEl('path', {fill:'#c46bff', stroke:'#e3b5ff', 'stroke-width':1.1,
+    'stroke-dasharray':'3 2.2', 'stroke-linejoin':'round', 'vector-effect':'non-scaling-stroke', opacity:'0'});
+  MAP.groups.taiping.appendChild(MAP.taipingPath);
+
+  MAP.groups.chinaAll.appendChild(MAP.groups.base);
+  MAP.groups.chinaAll.appendChild(MAP.groups.taiwanBase);
+  MAP.groups.chinaAll.appendChild(MAP.groups.qingLost);
+  MAP.groups.chinaAll.appendChild(MAP.groups.qingNow);
+  MAP.groups.chinaAll.appendChild(MAP.groups.taiwanQing);
+
+  MAP.groups.qingProvinces = svgEl('g', {id:'mapQingProvinces'});
+  MAP.qingProvincePaths = [];
+  (window.QING_PROVINCES || []).forEach(f => {
+    const path = svgEl('path', {
+      d: featPath(f, cproj), fill: QING_FILL, 'fill-opacity':'1',
+      stroke:'#e2cfa7', 'stroke-width':1.1, 'stroke-opacity':'.95',
+      'stroke-linejoin':'round', 'vector-effect':'non-scaling-stroke'
+    });
+    MAP.groups.qingProvinces.appendChild(path);
+    MAP.qingProvincePaths.push({name:f.n, path});
+  });
+  MAP.groups.chinaAll.appendChild(MAP.groups.qingProvinces);
+  MAP.groups.chinaAll.appendChild(MAP.groups.taiping);
+
+  // 领土得失高亮（收回=绿，失去=红）
+  MAP.groups.highlights = svgEl('g', {id:'mapHighlights'});
+  MAP.highlightEls = {};
+  const addHigh = (kind, key, d, color) => {
+    const p = svgEl('path', {d, fill:'none', stroke:color, 'stroke-width':1.7, 'stroke-linejoin':'round',
+      'stroke-dasharray':'7 5', 'vector-effect':'non-scaling-stroke', opacity:'0'});
+    MAP.groups.highlights.appendChild(p);
+    (MAP.highlightEls[key] = MAP.highlightEls[key] || []).push(p);
+  };
+  const byName = {};
+  (window.CHINA_MAP||[]).forEach(f => { byName[f.n] = f; });
+  if (byName['台湾省']) addHigh('gain','taiwan', featPath(byName['台湾省'], cproj), '#48d17a');
+  ['黑龙江省','吉林省','辽宁省'].forEach(n => { if (byName[n]) addHigh('gain','northeast', featPath(byName[n], cproj), '#48d17a'); });
+  addHigh('gain','ili', polyPath((window.HIGHLIGHT_POLYS||{}).ili||[], cproj), '#48d17a');
+  addHigh('gain','ludai', polyPath((window.HIGHLIGHT_POLYS||{}).ludai||[], cproj), '#48d17a');
+  if (byName['香港特别行政区']) addHigh('gain','hongkong', featPath(byName['香港特别行政区'], cproj), '#48d17a');
+  else addHigh('gain','hongkong', polyPath((window.HIGHLIGHT_POLYS||{}).hongkong||[], cproj), '#48d17a');
+  addHigh('gain','macau', polyPath((window.HIGHLIGHT_POLYS||{}).macau||[], cproj), '#48d17a');
+  const mongoliaFeature = (window.WORLD_MAP||[]).find(f => {
+    const c = ringCentroid(f);
+    return c[0] > 95 && c[0] < 115 && c[1] > 43 && c[1] < 50;
+  });
+  if (mongoliaFeature) addHigh('loss','mongolia', featPath(mongoliaFeature, cproj), '#ff4d4d');
+  MAP.groups.mongoliaHist = svgEl('g', {id:'mapMongoliaHist'});
+  if (mongoliaFeature){
+    MAP.mongoliaHistPath = svgEl('path', {
+      d: featPath(mongoliaFeature, cproj), fill:'#6d7d70', stroke:'#9aab92',
+      'stroke-width':1, 'stroke-linejoin':'round', 'vector-effect':'non-scaling-stroke', opacity:'.9'
+    });
+    MAP.groups.mongoliaHist.appendChild(MAP.mongoliaHistPath);
+    const mc = ringCentroid(mongoliaFeature);
+    const mp = cproj(mc[0], mc[1]);
+    const ml = svgEl('text', {x:mp[0], y:mp[1], 'text-anchor':'middle', fill:'#dce8d8',
+      'font-size':9, 'font-family':'SimSun, NSimSun, serif', 'pointer-events':'none'});
+    ml.textContent = '外蒙古';
+    ml.style.display = 'none';
+    MAP.groups.mongoliaHist.appendChild(ml);
+  }
+  MAP.groups.chinaAll.appendChild(MAP.groups.highlights);
+  if (MAP.groups.mongoliaHist) MAP.groups.chinaAll.appendChild(MAP.groups.mongoliaHist);
+  MAP.highlightFlash = null;
+
+  // 军阀割据图层（按省界近似）
+  const provPathMap = {};
+  (window.CHINA_MAP||[]).forEach(f => { provPathMap[f.n] = featPath(f, cproj); });
+  MAP.groups.warlords = svgEl('g', {id:'mapWarlords'});
+  MAP.warlordEls = [];
+  WARLORD_PHASES.forEach(ph => {
+    ph.factions.forEach(f => {
+      const d = f.prov.map(n => provPathMap[n] || '').join('');
+      const p = svgEl('path', {d, fill:f.color, stroke:f.color, 'stroke-width':.8,
+        'stroke-linejoin':'round', 'vector-effect':'non-scaling-stroke', opacity:'0'});
+      MAP.groups.warlords.appendChild(p);
+      MAP.warlordEls.push({ph, faction:f, path:p});
+    });
+  });
+  MAP.warlordLabels = [];
+  WARLORD_PHASES.forEach(ph => {
+    ph.factions.forEach(f => {
+      let cx = 0, cy = 0, n = 0;
+      f.prov.forEach(name => {
+        const feat = (window.CHINA_MAP||[]).find(x => x.n === name);
+        if (!feat) return;
+        const c = ringCentroid(feat);
+        cx += c[0]; cy += c[1]; n++;
+      });
+      if (!n) return;
+      const q = cproj(cx/n, cy/n);
+      const t = svgEl('text', {x:q[0], y:q[1], 'text-anchor':'middle', 'dominant-baseline':'middle',
+        fill:'#ffffff', 'font-weight':'700', 'font-size':8, opacity:'0',
+        'paint-order':'stroke', stroke:'rgba(0,0,0,.6)', 'stroke-width':2, 'class':'wl-label'});
+      t.textContent = f.name;
+      MAP.groups.warlords.appendChild(t);
+      MAP.warlordLabels.push({ph, el:t});
+    });
+  });
+  MAP.groups.chinaAll.appendChild(MAP.groups.warlords);
+
+  // HOI4 风格势力图层：按省界合并，按年份切换
+  MAP.groups.factions = svgEl('g', {id:'mapFactions'});
+  MAP.factionEls = [];
+  MAP.factionLabels = [];
+  function largestFactionCenter(f){
+    let best = null, bestArea = 0;
+    (f.prov || []).forEach(name => {
+      const feat = (window.CHINA_MAP || []).find(x => x.n === name);
+      if (!feat) return;
+      (feat.p || []).forEach(poly => {
+        const ring = poly && poly[0]; if (!ring || ring.length < 3) return;
+        let area = 0;
+        for (let i=0;i<ring.length;i++){
+          const a=ring[i], b=ring[(i+1)%ring.length];
+          area += a[0]*b[1] - b[0]*a[1];
+        }
+        area = Math.abs(area)/2;
+        if (area > bestArea){
+          bestArea = area;
+          let x=0,y=0; ring.forEach(p=>{x+=p[0];y+=p[1];});
+          best = [x/ring.length, y/ring.length];
+        }
+      });
+    });
+    return best;
+  }
+  function factionAngle(f){
+    let minX=999, maxX=-999, minY=999, maxY=-999;
+    (f.prov || []).forEach(name => {
+      const feat = (window.CHINA_MAP || []).find(x => x.n === name);
+      if (!feat) return;
+      (feat.p || []).forEach(poly => (poly || []).forEach(ring => (ring || []).forEach(pt => {
+        const lon = pt[0], lat = pt[1];
+        if (lon < minX) minX = lon; if (lon > maxX) maxX = lon;
+        if (lat < minY) minY = lat; if (lat > maxY) maxY = lat;
+      })));
+    });
+    return (maxX - minX) >= (maxY - minY) ? 0 : -90;
+  }
+  (window.FACTION_PHASES || []).forEach(ph => {
+    ph.factions.forEach(f => {
+      const d = f.prov.map(n => provPathMap[n] || '').join('');
+      const p = svgEl('path', {d, fill:f.color, stroke:f.color, 'stroke-width':.9,
+        'stroke-linejoin':'round', 'vector-effect':'non-scaling-stroke', opacity:'0'});
+      MAP.groups.factions.appendChild(p);
+      MAP.factionEls.push({ph, faction:f, path:p});
+    });
+  });
+  MAP.factionLabels = [];
+  function largestFactionCenter(f){
+    let best = null, bestArea = 0;
+    (f.prov || []).forEach(name => {
+      const feat = (window.CHINA_MAP || []).find(x => x.n === name);
+      if (!feat) return;
+      (feat.p || []).forEach(poly => {
+        const ring = poly && poly[0]; if (!ring || ring.length < 3) return;
+        let area = 0;
+        for (let i=0;i<ring.length;i++){
+          const a=ring[i], b=ring[(i+1)%ring.length];
+          area += a[0]*b[1] - b[0]*a[1];
+        }
+        area = Math.abs(area)/2;
+        if (area > bestArea){
+          bestArea = area;
+          let x=0,y=0; ring.forEach(p=>{x+=p[0];y+=p[1];});
+          best = [x/ring.length, y/ring.length];
+        }
+      });
+    });
+    return best;
+  }
+  function factionAngle(f){
+    let minX=999, maxX=-999, minY=999, maxY=-999;
+    (f.prov || []).forEach(name => {
+      const feat = (window.CHINA_MAP || []).find(x => x.n === name);
+      if (!feat) return;
+      (feat.p || []).forEach(poly => (poly || []).forEach(ring => (ring || []).forEach(pt => {
+        const lon = pt[0], lat = pt[1];
+        if (lon < minX) minX = lon; if (lon > maxX) maxX = lon;
+        if (lat < minY) minY = lat; if (lat > maxY) maxY = lat;
+      })));
+    });
+    return (maxX - minX) >= (maxY - minY) ? 0 : -90;
+  }
+  (window.FACTION_PHASES || []).forEach(ph => {
+    ph.factions.forEach(f => {
+      let cx = 0, cy = 0, n = 0;
+      f.prov.forEach(name => {
+        const feat = (window.CHINA_MAP || []).find(x => x.n === name);
+        if (!feat) return;
+        const c = ringCentroid(feat);
+        cx += c[0]; cy += c[1]; n++;
+      });
+      if (!n) return;
+      const q = cproj(cx/n, cy/n);
+      const center = largestFactionCenter(f);
+      if (!center) return;
+      const q2 = cproj(center[0], center[1]);
+      const g = svgEl('g', {});
+      const chars = Array.from(f.name);
+      const lh0 = 26;
+      const y0 = q2[1] - (chars.length - 1) * lh0 / 2;
+      const t = svgEl('text', {x:q2[0], y:y0, 'text-anchor':'middle', 'dominant-baseline':'middle',
+        fill:'#1a120d', 'fill-opacity':'.82', 'font-weight':'600', 'font-size':24,
+        opacity:'0', stroke:'none', 'class':'wl-label'});
+      chars.forEach((ch, i) => {
+        const ts = document.createElementNS('http://www.w3.org/2000/svg','tspan');
+        ts.setAttribute('x', q2[0]); ts.setAttribute('dy', i ? lh0 : 0);
+        ts.textContent = ch; t.appendChild(ts);
+      });
+      g.appendChild(t);
+      MAP.groups.factions.appendChild(g);
+      MAP.factionLabels.push({ph, faction:f, el:t, x:q2[0], y:q2[1], chars, name:f.name});
+    });
+  });
+  MAP.groups.chinaAll.appendChild(MAP.groups.factions);
+
+  MAP.groups.occLabels = svgEl('g', {id:'mapOccLabels'});
+  MAP.occEls = [];
+  [
+    {id:'tw', name:'日占台湾', lon:121.0, lat:23.7, from:1895, to:1945, color:'#a85a32'},
+    {id:'ne', name:'日占东北', lon:126.0, lat:45.0, from:1931, to:1945, color:'#a85a32'},
+    {id:'hk', name:'英占香港', lon:114.17, lat:22.32, from:1842, to:1997, color:'#7d6bff'},
+    {id:'mo', name:'葡占澳门', lon:113.55, lat:22.19, from:1887, to:1999, color:'#9a8f7f'}
+  ].forEach(o => {
+    const q = cproj(o.lon, o.lat);
+    const g = svgEl('g', {});
+    const chars = Array.from(o.name);
+    const lh0 = 24;
+    const y0 = q[1] - (chars.length - 1) * lh0 / 2;
+    const t = svgEl('text', {x:q[0], y:y0, 'text-anchor':'middle', 'dominant-baseline':'middle',
+      fill:'#4a1c1c', 'fill-opacity':'.88', 'font-size':20, 'font-weight':'600',
+      stroke:'none', 'class':'occ-label'});
+    chars.forEach((ch, i) => {
+      const ts = document.createElementNS('http://www.w3.org/2000/svg','tspan');
+      ts.setAttribute('x', q[0]); ts.setAttribute('dy', i ? lh0 : 0);
+      ts.textContent = ch; t.appendChild(ts);
+    });
+    g.appendChild(t);
+    MAP.groups.occLabels.appendChild(g);
+    MAP.occEls.push({...o, g, el:t, x:q[0], y:q[1], chars});
+  });
+  MAP.groups.chinaAll.appendChild(MAP.groups.occLabels);
+
+  // 关键历史节点（圆点 + 名称）
+  MAP.groups.sites = svgEl('g', {id:'mapSites'});
+  MAP.siteEls = [];
+  (window.KEY_SITES || []).forEach(site => {
+    const p = cproj(site.lon, site.lat);
+    const g = svgEl('g', {});
+    const dot = svgEl('circle', {cx:p[0], cy:p[1], r:3, fill:'#ffd166', stroke:'#120f08',
+      'stroke-width':1.2, opacity:'0', 'vector-effect':'non-scaling-stroke'});
+    const label = svgEl('text', {x:p[0]+5, y:p[1]-5, fill:'#ffe4a8', 'font-size':9,
+      'font-weight':600, stroke:'none', opacity:'0'});
+    label.textContent = site.name;
+    g.appendChild(dot); g.appendChild(label);
+    MAP.groups.sites.appendChild(g);
+    MAP.siteEls.push({site, dot, label});
+  });
+
+  // 行军路线（北伐、秋收、三大战役、渡江）
+  MAP.groups.extraRoutes = svgEl('g', {id:'mapExtraRoutes'});
+  MAP.extraRouteEls = [];
+  (window.EXTRA_ROUTES || []).forEach(route => {
+    const pts = route.points.map(q => cproj(q[0], q[1]));
+    const d = pts.map((q,i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ');
+    const casing = svgEl('path', {d, fill:'none', stroke:'#061019', 'stroke-width':5.2,
+      'stroke-linecap':'round', 'stroke-linejoin':'round',
+      'vector-effect':'non-scaling-stroke', opacity:'0'});
+    const path = svgEl('path', {d, fill:'none', stroke:route.color || '#ffd166', 'stroke-width':2.2,
+      'stroke-dasharray':'7 4', 'stroke-linecap':'round', 'stroke-linejoin':'round',
+      'vector-effect':'non-scaling-stroke', opacity:'0'});
+    const mid = pts[Math.floor(pts.length/2)];
+    const label = svgEl('text', {x:mid[0]+4, y:mid[1]-5, fill:route.color || '#ffd166',
+      'font-size':9, 'font-weight':600, 'paint-order':'stroke', stroke:'#0b1118', 'stroke-width':2.4, opacity:'0'});
+    label.textContent = route.name;
+    MAP.groups.extraRoutes.appendChild(casing);
+    MAP.groups.extraRoutes.appendChild(path);
+    MAP.groups.extraRoutes.appendChild(label);
+    MAP.extraRouteEls.push({route, path, casing, label});
+  });
+
+  MAP.groups.chinaAll.appendChild(MAP.groups.sites);
+  MAP.groups.chinaAll.appendChild(MAP.groups.extraRoutes);
+
+  svg.appendChild(MAP.groups.chinaAll);
+
+  // ---------- 长征路线 ----------
+  MAP.groups.route = svgEl('g', {id:'mapRoute'});
+  MAP.groups.routeFull = svgEl('path', {d:fullRoutePath(), fill:'none', stroke:'#ffcf6e',
+    'stroke-width':2.2, 'stroke-dasharray':'7 5', 'vector-effect':'non-scaling-stroke', opacity:.95});
+  MAP.groups.routeDone = svgEl('path', {fill:'none', stroke:'#ffb45c', 'stroke-width':3.4,
+    'stroke-linecap':'round', 'stroke-linejoin':'round', 'vector-effect':'non-scaling-stroke'});
+  MAP.groups.routeHead = svgEl('circle', {r:5, fill:'#fff', stroke:'#ff9d3c', 'stroke-width':2});
+  MAP.groups.routeLabels = svgEl('g', {});
+  MAP.routeLabelEls = [];
+  [0,4,13,22].forEach(i => {
+    const p = ROUTE_PTS[i];
+    const t = svgEl('text', {x:p.x+4, y:p.y-6, fill:'#e8c48a', 'font-size':10,
+      'paint-order':'stroke', stroke:'#0b1118', 'stroke-width':2.5, 'font-weight':600});
+    t.textContent = p.name;
+    t.style.opacity = '0';
+    MAP.groups.routeLabels.appendChild(t);
+    MAP.routeLabelEls.push(t);
+  });
+  MAP.groups.route.appendChild(MAP.groups.routeFull);
+  MAP.groups.route.appendChild(MAP.groups.routeDone);
+  MAP.groups.route.appendChild(MAP.groups.routeLabels);
+  MAP.groups.route.appendChild(MAP.groups.routeHead);
+  svg.appendChild(MAP.groups.route);
+
+  // ---------- 标记 ----------
+  MAP.groups.marker = svgEl('g', {id:'mapMarker'});
+  MAP.groups.markerDot = svgEl('circle', {r:5.5, fill:'#ffd479', stroke:'#fff', 'stroke-width':1.2});
+  MAP.groups.markerLbl = svgEl('text', {fill:'#ffd479', 'font-size':11, 'font-weight':700,
+    stroke:'none'});
+  MAP.groups.marker.appendChild(MAP.groups.markerDot);
+  MAP.groups.marker.appendChild(MAP.groups.markerLbl);
+  svg.appendChild(MAP.groups.marker);
+  MAP.groups.eventPlace = svgEl('text', {id:'eventPlaceLbl', fill:'#ffe4a8', 'font-size':11,
+    'font-weight':600, stroke:'none', opacity:'0'});
+  const annoLayer = document.getElementById('annoSvg');
+  (annoLayer || svg).appendChild(MAP.groups.eventPlace);
+  buildLocator();
+  hideLocator();
+
+  MAP.groups.world.style.display = 'none';
+  MAP.groups.route.style.display = 'none';
+  MAP.groups.marker.style.display = 'none';
+  applyMapView();
+  updateQingPhase(performance.now());
+  updateTerritory(performance.now());
+}
+
+function mapScreenScale(){
+  const ratio = MAP.mode === 'world' ? (667/1656) : (432/744);
+  const w = MAP.view.w, h = w * ratio;
+  const rect = mapSvg.getBoundingClientRect();
+  const scale = Math.min(rect.width / w, rect.height / h);
+  const cw = w * scale, ch = h * scale;
+  return {rect, w, h, scale,
+    ox: rect.left + (rect.width - cw)/2,
+    oy: rect.top  + (rect.height - ch)/2};
+}
+function mapZoomAt(sx, sy, factor){
+  const r = mapScreenScale();
+  const ratio = MAP.mode === 'world' ? (667/1656) : (432/744);
+  const mapX = MAP.view.cx - r.w/2 + (sx - r.ox)/r.scale;
+  const mapY = MAP.view.cy - r.h/2 + (sy - r.oy)/r.scale;
+  const newW = Math.max(60, Math.min(1400, MAP.view.w * factor));
+  const newH = newW * ratio;
+  const newScale = Math.min(r.rect.width / newW, r.rect.height / newH);
+  const newOx = r.rect.left + (r.rect.width - newW*newScale)/2;
+  const newOy = r.rect.top + (r.rect.height - newH*newScale)/2;
+  MAP.view.w = newW;
+  MAP.view.cx = mapX - (sx - newOx)/newScale + newW/2;
+  MAP.view.cy = mapY - (sy - newOy)/newScale + newH/2;
+  MAP.goal = {cx: MAP.view.cx, cy: MAP.view.cy, w: MAP.view.w};
+  applyMapView();
+  updateTerrAnno();
+  updateEventAnno();
+  updateQingPhase(performance.now());
+}
+function mapZoomReset(){
+  const fv = fullView(MAP.mode);
+  MAP.view.cx = fv.cx; MAP.view.cy = fv.cy; MAP.view.w = fv.w;
+  MAP.goal = {cx: fv.cx, cy: fv.cy, w: fv.w};
+  applyMapView();
+  updateTerrAnno();
+  updateEventAnno();
+  updateQingPhase(performance.now());
+}
+function mapPointToScreen(lon, lat){
+  const p = cproj(lon, lat);
+  const r = mapScreenScale();
+  return [r.ox + (p[0] - (MAP.view.cx - r.w/2)) * r.scale,
+          r.oy + (p[1] - (MAP.view.cy - r.h/2)) * r.scale];
+}
+function applyMapView(){
+  const ratio = MAP.mode === 'world' ? (667/1656) : (432/744);
+  const w = MAP.view.w, h = w * ratio;
+  mapSvg.setAttribute('viewBox', (MAP.view.cx-w/2) + ' ' + (MAP.view.cy-h/2) + ' ' + w + ' ' + h);
+  // 让地图上的文字/圆点在屏幕上保持固定大小（不随缩放变大）
+  const bgH = mapSvg.clientHeight || (H * 0.74) || 600;
+  const u = h / bgH;
+  if (MAP.routeLabelEls){
+    MAP.routeLabelEls.forEach(t => {
+      t.setAttribute('font-size', (10.5 * Math.pow(u, 0.7)).toFixed(2));
+      t.setAttribute('stroke-width', '1.6');
+      t.style.opacity = '0';
+    });
+  }
+  const txtScale = Math.pow(u, 0.7);
+  if (MAP.groups.markerLbl){
+    MAP.groups.markerLbl.setAttribute('font-size', (11 * txtScale).toFixed(2));
+    MAP.groups.markerLbl.setAttribute('stroke-width', (2.2 * Math.pow(u, 0.3)).toFixed(2));
+  }
+  if (MAP.groups.eventPlace){
+    const z = 744 / Math.max(1, MAP.view.w);
+    MAP.groups.eventPlace.setAttribute('font-size', (11 * Math.pow(z, 0.3)).toFixed(2));
+  }
+  if (MAP.groups.markerDot) MAP.groups.markerDot.setAttribute('r', (5 * u).toFixed(2));
+  if (MAP.groups.routeHead) MAP.groups.routeHead.setAttribute('r', (4.5 * u).toFixed(2));
+  if (MAP.warlordLabels) MAP.warlordLabels.forEach(o => o.el.setAttribute('font-size', (8.5 * u).toFixed(2)));
+  if (MAP.occEls) MAP.occEls.forEach(o => {
+    const fs = 20*u, lh = fs*1.08;
+    o.el.setAttribute('font-size', fs.toFixed(2));
+    o.el.setAttribute('y', (o.y - (o.chars.length-1)*lh/2).toFixed(2));
+    o.el.querySelectorAll('tspan').forEach((ts,i) => {
+      ts.setAttribute('x', o.x.toFixed(2));
+      ts.setAttribute('dy', (i ? lh : 0).toFixed(2));
+    });
+  });
+  if (MAP.factionLabels) MAP.factionLabels.forEach(o => {
+    const fs = 24*u, lh = fs*1.08;
+    o.el.setAttribute('font-size', fs.toFixed(2));
+    o.el.setAttribute('y', (o.y - (o.chars.length-1)*lh/2).toFixed(2));
+    o.el.querySelectorAll('tspan').forEach((ts,i) => {
+      ts.setAttribute('x', o.x.toFixed(2));
+      ts.setAttribute('dy', (i ? lh : 0).toFixed(2));
+    });
+  });
+  if (MAP.siteEls){
+    MAP.siteEls.forEach(o => {
+      o.dot.setAttribute('r', (3 * Math.pow(u, 0.5)).toFixed(2));
+      o.label.setAttribute('font-size', (9 * txtScale).toFixed(2));
+      o.label.setAttribute('stroke-width', (2.2 * Math.pow(u, 0.3)).toFixed(2));
+    });
+  }
+  if (MAP.extraRouteEls){
+    MAP.extraRouteEls.forEach(o => {
+      o.label.setAttribute('font-size', (9 * u).toFixed(2));
+      o.label.setAttribute('stroke-width', (2.4 * u).toFixed(2));
+    });
+  }
+}
+function updateTerrAnno(){
+  const line = document.getElementById('terrLine');
+  const dot = document.getElementById('terrDot');
+  const anchor = document.getElementById('terrAnchor');
+  const el = document.getElementById('terrPopup');
+  if (!line || !dot || !anchor || !el) return;
+  if (!el.classList.contains('show') || !MAP.terrTarget){
+    line.style.opacity='0'; dot.style.opacity='0'; anchor.style.opacity='0'; return;
+  }
+  const target = mapPointToScreen(MAP.terrTarget[0], MAP.terrTarget[1]);
+  // 目标在地图左侧时，弹窗自动换到左侧；每帧重算，拖动/缩放后也不会错位
+  let wantLeft = el.classList.contains('left');
+  if (target[0] < W * 0.44) wantLeft = true;
+  else if (target[0] > W * 0.59) wantLeft = false;
+  el.classList.toggle('left', wantLeft);
+  const r = el.getBoundingClientRect();
+  const isLeft = el.classList.contains('left');
+  const sx = isLeft ? (r.right + 2) : (r.left - 2);
+  const sy = r.top + 42;
+  const tx = target[0], ty = target[1];
+  // 相对位置矢量：控制点取两端中点并向上偏移，缩放/拖动时每帧重算，始终锚定
+  const dx = tx - sx, dy = ty - sy;
+  const mx = sx + dx*0.5, my = Math.min(sy,ty) - Math.min(120, Math.abs(dx)*0.25 + 30);
+  line.setAttribute('d', 'M '+sx+' '+sy+' Q '+mx+' '+my+' '+tx+' '+ty);
+  line.setAttribute('marker-start','url(#annoArrowStart)');
+  line.setAttribute('marker-end','url(#annoArrowEnd)');
+  line.style.opacity = '.95';
+  anchor.setAttribute('cx', sx); anchor.setAttribute('cy', sy);
+  anchor.style.opacity = '1';
+  dot.setAttribute('cx', tx); dot.setAttribute('cy', ty);
+  dot.style.opacity = '1';
+}
+function mapTick(){
+  if (mapSnap){
+    MAP.view.cx = MAP.goal.cx; MAP.view.cy = MAP.goal.cy; MAP.view.w = MAP.goal.w;
+    applyMapView();
+    updateTerrAnno();
+    return;
+  }
+  const k = 0.16;
+  MAP.view.cx += (MAP.goal.cx - MAP.view.cx) * k;
+  MAP.view.cy += (MAP.goal.cy - MAP.view.cy) * k;
+  MAP.view.w  += (MAP.goal.w  - MAP.view.w ) * k;
+  applyMapView();
+  updateTerrAnno();
+}
+function showMapMode(mode){
+  if (MAP.mode === mode) return;
+  MAP.mode = mode;
+  const ca = MAP.groups.chinaAll, wd = MAP.groups.world;
+  ca.style.transition = 'opacity .6s ease';
+  wd.style.transition = 'opacity .6s ease';
+  if (mode === 'world'){
+    wd.style.display = '';
+    requestAnimationFrame(() => { wd.style.opacity = '1'; ca.style.opacity = '0'; });
+    setTimeout(() => { if (MAP.mode === 'world') ca.style.display = 'none'; }, 650);
+  } else {
+    ca.style.display = '';
+    requestAnimationFrame(() => { ca.style.opacity = '1'; wd.style.opacity = '0'; });
+    setTimeout(() => { if (MAP.mode === 'china') wd.style.display = 'none'; }, 650);
+  }
+  mapFootR.textContent = (mode === 'china') ? '中国地图' : '世界地图';
+  if (mapVeil){ mapVeil.style.opacity = '.92'; setTimeout(() => { mapVeil.style.opacity = '0'; }, 260); }
+  const fv = fullView(mode);
+  MAP.view.cx = fv.cx; MAP.view.cy = fv.cy; MAP.view.w = fv.w;
+  applyMapView();
+}
+function setMapGoal(cx, cy, w){ MAP.goal = {cx, cy, w}; }
+function lprojC(lon, lat){ return [8 + (lon-73)/62*140, 8 + (54-lat)/36*84]; }
+function lprojW(lon, lat){ return [8 + (lon+180)/360*140, 8 + (85-lat)/145*84]; }
+function buildLocator(){
+  const svg = document.getElementById('locSvg');
+  if (!svg || !window.CHINA_MAP) return;
+  const gC = svgEl('g', {id:'locChina'});
+  window.CHINA_MAP.forEach(f => {
+    gC.appendChild(svgEl('path', {d: featPath(f, lprojC), fill:'#1e3245', stroke:'#3d5d7d',
+      'stroke-width':0.5, 'stroke-linejoin':'round'}));
+  });
+  const gW = svgEl('g', {id:'locWorld'});
+  (window.WORLD_MAP||[]).forEach(f => {
+    gW.appendChild(svgEl('path', {d: featPath(f, lprojW), fill:'#22323f', stroke:'#415a72',
+      'stroke-width':0.5, 'stroke-linejoin':'round'}));
+  });
+  gW.style.display = 'none';
+  const dot = svgEl('circle', {id:'locDot', r:3.4, fill:'#ffd479', stroke:'#fff', 'stroke-width':1.2});
+  svg.appendChild(gC); svg.appendChild(gW); svg.appendChild(dot);
+  MAP.loc = {svg, china:gC, world:gW, dot};
+}
+function updateLocator(lon, lat, world){
+  const el = document.getElementById('locator');
+  if (!el || !MAP.loc) return;
+  el.style.display = 'block';
+  MAP.loc.china.style.display = world ? 'none' : '';
+  MAP.loc.world.style.display = world ? '' : 'none';
+  const p = world ? lprojW(lon, lat) : lprojC(lon, lat);
+  MAP.loc.dot.setAttribute('cx', p[0]);
+  MAP.loc.dot.setAttribute('cy', p[1]);
+  document.getElementById('locLabel').textContent = (world ? '世界' : '中国') + ' · 定位';
+}
+function hideLocator(){
+  const el = document.getElementById('locator');
+  if (el) el.style.display = 'none';
+}
+function drawMapMarker(p, label){
+  MAP.groups.marker.style.display = '';
+  MAP.groups.markerDot.setAttribute('cx', p[0]);
+  MAP.groups.markerDot.setAttribute('cy', p[1]);
+  MAP.groups.markerLbl.setAttribute('x', p[0] + 9);
+  MAP.groups.markerLbl.setAttribute('y', p[1] + 4);
+  MAP.groups.markerLbl.textContent = label || '';
+}
+function focusMap(ev){
+  const routeNow = currentYear >= 1934.68 && currentYear <= 1936.9;
+  if (routeNow){
+    MAP.route = true;
+    MAP.groups.route.style.display = '';
+    updateRoute();
+    mapFootL.textContent = '长征路线 · 1934.10—1936.10';
+  } else {
+    MAP.route = false;
+    MAP.groups.route.style.display = 'none';
+  }
+  // 地图不再自动移动/缩放，保持用户手动调整后的视角
+  return;
+  const zoomToEvent = !!MAP.zoomToEvent;
+  if (factionMode && factionPhaseAt(currentYear) && !zoomToEvent && !routeNow){
+    MAP.route = false;
+    MAP.groups.route.style.display = 'none';
+    if (MAP.mode !== 'china') showMapMode('china');
+    const fv = fullView('china');
+    setMapGoal(fv.cx, fv.cy, fv.w);
+    MAP.transitioning = false;
+    MAP.groups.marker.style.display = 'none';
+    hideLocator();
+    mapSub.textContent = '势力图 · ' + factionPhaseAt(currentYear).label;
+    mapFootL.textContent = '按省界示意 · 悬停看控制势力';
+    return;
+  }
+  const prevFocusYear = MAP.lastFocusYear;
+  MAP.lastFocusYear = currentYear;
+  // 点击节点时立即定位，不走“先拉全图再飞”的两段式，确保地点放大可靠
+  const bigJump = !zoomToEvent && (MAP.forceFly || (prevFocusYear !== null && Math.abs(currentYear - prevFocusYear) > 3));
+  MAP.forceFly = false;
+  if (routeNow){
+    MAP.route = true;
+    const b = routeBounds();
+    const showRoute = () => {
+      setMapGoal(b.cx, b.cy, b.w);
+      mapSub.textContent = '长征路线 · 1934.10—1936.10';
+      mapFootL.textContent = '瑞金 → 遵义 → 会宁';
+      MAP.groups.route.style.display = '';
+      MAP.groups.marker.style.display = 'none';
+      hideLocator();
+      updateRoute();
+      MAP.transitioning = false;
+    };
+    if (MAP.mode !== 'china'){
+      if (MAP.transitioning) return;
+      MAP.transitioning = true;
+      const fv = fullView(MAP.mode);
+      setMapGoal(fv.cx, fv.cy, fv.w);
+      setTimeout(() => { showMapMode('china'); showRoute(); }, 380);
+      return;
+    }
+    showRoute();
+    return;
+  }
+  MAP.route = false;
+  MAP.groups.route.style.display = 'none';
+  if (ev && ev.loc){
+    const world = !!ev.loc.world;
+    const mode = world ? 'world' : 'china';
+    const p = world ? wproj(ev.loc.lon, ev.loc.lat) : cproj(ev.loc.lon, ev.loc.lat);
+    const finish = () => {
+      const apply = () => {
+        setMapGoal(p[0], p[1], world ? 520 : 190);
+        drawMapMarker(p, ev.loc.place);
+        updateLocator(ev.loc.lon, ev.loc.lat, world);
+        MAP.transitioning = false;
+      };
+      const rg = ev.loc.region && ev.loc.region !== ev.loc.place ? ' · ' + ev.loc.region : '';
+      mapSub.textContent = (ev.loc.place || '') + rg + (world ? ' · 世界' : '');
+      mapFootL.textContent = eventWhen(ev) + ' ' + ev.title;
+      if (bigJump && !MAP.transitioning){
+        MAP.transitioning = true;
+        const fv = fullView(mode);
+        setMapGoal(fv.cx, fv.cy, fv.w);
+        setTimeout(apply, 340);
+      } else {
+        apply();
+      }
+    };
+    if (mode !== MAP.mode){
+      if (MAP.transitioning) return;
+      MAP.transitioning = true;
+      const fv = fullView(MAP.mode);
+      setMapGoal(fv.cx, fv.cy, fv.w);
+      setTimeout(() => { showMapMode(mode); finish(); }, 380);
+      return;
+    }
+    finish();
+  } else {
+    if (MAP.mode !== 'china'){
+      if (MAP.transitioning) return;
+      MAP.transitioning = true;
+      const fv = fullView(MAP.mode);
+      setMapGoal(fv.cx, fv.cy, fv.w);
+      setTimeout(() => {
+        showMapMode('china');
+        const fc = fullView('china');
+        setMapGoal(fc.cx, fc.cy, fc.w);
+        mapSub.textContent = '中国 · 事件定位';
+        mapFootL.textContent = '—';
+        MAP.groups.marker.style.display = 'none';
+        MAP.transitioning = false;
+      }, 380);
+      return;
+    }
+    const fc = fullView('china');
+    setMapGoal(fc.cx, fc.cy, fc.w);
+    mapSub.textContent = '中国 · 事件定位';
+    mapFootL.textContent = '—';
+    MAP.groups.marker.style.display = 'none';
+    hideLocator();
+  }
+}
+const QPHASES = window.QING_PHASES || [];
+let qingInit = false, qingCur = -2, qingLostStart = 0, qingLostOn = false;
+function phaseIndexFor(y){
+  if (y >= 1946) return -1;
+  for (let i = QPHASES.length-1; i >= 0; i--) if (y >= QPHASES[i].from) return i;
+  return 0;
+}
+function phasePath(rings){
+  return rings.map(r => {
+    // 统一绕向，避免重叠区域被填充规则挖成洞
+    let a = 0;
+    for (let i=0;i<r.length;i++){ const p=r[i], q=r[(i+1)%r.length]; a += p[0]*q[1] - q[0]*p[1]; }
+    const ring = (a < 0) ? r.slice().reverse() : r;
+    let d = '';
+    ring.forEach((p,i) => { const q = cproj(p[0], p[1]); d += (i ? 'L' : 'M') + q[0].toFixed(1) + ',' + q[1].toFixed(1); });
+    return d + 'Z';
+  }).join('');
+}
+function setQingShape(idx){
+  if (idx >= 0 && QPHASES[idx]){
+    MAP.qingNowPath.setAttribute('d', phasePath(QPHASES[idx].rings));
+    MAP.groups.qingNow.style.display = '';
+  } else {
+    MAP.groups.qingNow.style.display = 'none';
+  }
+}
+
+function territoryCamera(now){
+  MAP.terrHoldUntil = now + 2600;
+  if (MAP.mode !== 'china') showMapMode('china');
+  const fv = fullView('china');
+  setMapGoal(fv.cx, fv.cy, fv.w);
+  MAP.transitioning = false;
+  mapSub.textContent = '领土变化 · 中国';
+  hideLocator();
+}
+function showTerrPopup(t){
+  const el = document.getElementById('terrPopup');
+  if (!el) return;
+  const kind = (t.type === 'loss') ? '割让' : (t.type === 'gain') ? '收回' : '时期';
+  MAP.terrTarget = t.at || null;
+  let side = 'right';
+  if (t.at){
+    try { side = (mapPointToScreen(t.at[0], t.at[1])[0] < W * 0.5) ? 'left' : 'right'; } catch(_) {}
+  }
+  MAP.terrSide = side;
+  el.className = 'show anno ' + t.type + ' ' + side;
+  el.innerHTML = '<div class="tpTag">批注 · 领土变化</div>' +
+    '<div class="tpTop"><span class="tpYear">' + t.y + '</span><span class="tpKind">' + kind + '</span></div>' +
+    '<div class="tpTitle">' + esc(t.title) + '</div><div class="tpDetail">' + esc(t.detail) + '</div>';
+  MAP.terrPopupActive = true;
+  MAP.terrPopupYear = t.y;
+  MAP.terrPopupShownYear = currentYear;
+  MAP.terrPopupActiveId = activeId;
+  clearTimeout(terrPopupTimer);
+}
+function hideTerrPopup(){
+  const el = document.getElementById('terrPopup');
+  if (el) el.className = '';
+  MAP.terrPopupActive = false;
+  MAP.terrTarget = null;
+  ['terrLine','terrDot','terrAnchor'].forEach(id => {
+    const n = document.getElementById(id); if (n) n.style.opacity = '0';
+  });
+}
+function flashHighlight(keys, color, now){
+  if (!keys || !keys.length) return;
+  MAP.highlightFlash = {keys, color, start: now};
+}
+function updateTerritory(now){
+  if (activeTrack === 'mao' || (factionMode && factionPhaseAt(currentYear))){ if (MAP.terrPopupActive) hideTerrPopup(); return; }
+  // 触发/回退弹窗
+  for (const t of TERRITORY){
+    const past = currentYear >= t.y;
+    if (past && !terrTriggered.has(t.y)){
+      terrTriggered.add(t.y);
+      if (currentYear - t.y <= 2){
+        showTerrPopup(t);
+        mapHoldUntil = now + 1600;
+        if (t.gain) flashHighlight(t.gain, '#22e6a0', now);
+        if (t.lossKey) flashHighlight([t.lossKey], '#ff2e63', now);
+      }
+    } else if (!past && terrTriggered.has(t.y)){
+      terrTriggered.delete(t.y);
+      if (t.gain) flashHighlight([], '#48d17a', now);
+      if (t.lossKey) flashHighlight([], '#ff4d4d', now);
+    }
+  }
+  // 高亮淡出
+  if (MAP.highlightFlash){
+    const e = now - MAP.highlightFlash.start;
+    const k = Math.max(0, Math.min(1, 1 - e/2600));
+    const op = (e < 2600) ? 0.9 * k * k * (3 - 2 * k) : 0;
+    Object.keys(MAP.highlightEls).forEach(k => {
+      const on = (e < 3600) && MAP.highlightFlash.keys.includes(k);
+      MAP.highlightEls[k].forEach(el => { el.style.opacity = on ? op : '0'; });
+    });
+    if (e >= 2600) MAP.highlightFlash = null;
+  }
+}
+function updateQingPhase(now){
+  if (!MAP.qingNowPath || !QPHASES.length) return;
+  const idx = phaseIndexFor(currentYear);
+  // 清代期间隐藏现代底图（只显示清代疆域），1946 后切到现代底图
+  if (MAP.groups.highlights) MAP.groups.highlights.style.display = '';
+  MAP.groups.base.style.display = (currentYear >= 1946) ? '' : 'none';
+  const qingProvOn = !!(MAP.groups.qingProvinces && activeTrack !== 'mao' && currentYear < 1912 && MAP.groups.qingNow.style.display !== 'none');
+  if (MAP.groups.qingProvinces){
+    MAP.groups.qingProvinces.style.display = qingProvOn ? '' : 'none';
+    MAP.qingProvincePaths.forEach(o => {
+      o.path.style.display = '';
+    });
+  }
+  if (qingProvOn){
+    MAP.qingNowPath.setAttribute('fill', QING_FILL);
+    MAP.qingNowPath.style.opacity = '0';
+  } else {
+    MAP.qingNowPath.style.opacity = '.92';
+  }
+  if (MAP.mode === 'china'){
+    mapFootR.textContent = (currentYear < 1912) ? '清 · 1911 年省界' : (currentYear < 1949 ? '中华民国' : '中华人民共和国');
+  }
+  if (MAP.groups.mongoliaHist){
+    MAP.groups.mongoliaHist.style.display = (activeTrack !== 'mao' && currentYear >= 1912 && currentYear < 1946) ? '' : 'none';
+  }
+  // 1912–1949 民国时期换一种颜色，避免看起来一直是清朝
+  const roc = (currentYear >= 1912 && currentYear < 1949);
+  MAP.qingNowPath.setAttribute('fill', roc ? '#5b6f63' : QING_FILL);
+  MAP.qingNowPath.setAttribute('stroke', roc ? '#94a88f' : QING_STROKE);
+  MAP.taiwanQingPath.setAttribute('fill', roc ? '#5b6f63' : QING_FILL);
+  if (MAP.mode === 'china'){
+    mapFootR.textContent = (currentYear < 1912) ? '清 · 1911 年省界' : (currentYear < 1949 ? '中华民国' : '中华人民共和国');
+  }
+  // 太平天国：1851–1864 用独立颜色显示，并给地图批注
+  const tpPhase = QPHASES[idx];
+  const tpOn = !!(activeTrack !== 'mao' && tpPhase && tpPhase.taiping && currentYear >= 1851 && currentYear < 1864);
+  const tpNote = document.getElementById('taipingNote');
+  if (tpOn){
+    MAP.taipingPath.setAttribute('d', phasePath(tpPhase.taiping));
+    MAP.groups.taiping.style.display = '';
+    MAP.taipingPath.style.opacity = '.9';
+    if (tpNote){
+      const p = mapPointToScreen(118.8, 32.06);
+      tpNote.style.left = p[0] + 'px';
+      tpNote.style.top = (p[1] - 18) + 'px';
+      tpNote.classList.add('show');
+      if (!tpNote.dataset.flashed){
+        tpNote.dataset.flashed = '1';
+        tpNote.classList.remove('flash');
+        void tpNote.offsetWidth;
+        tpNote.classList.add('flash');
+        setTimeout(() => tpNote.classList.remove('flash'), 1800);
+      }
+    }
+  } else {
+    MAP.groups.taiping.style.display = 'none';
+    if (tpNote){ tpNote.classList.remove('show'); delete tpNote.dataset.flashed; }
+  }
+  // 1895—1945 台湾被割让：隐藏台湾；1945 后恢复
+  MAP.groups.taiwanBase.style.display = (currentYear >= 1895) ? '' : 'none';
+  MAP.taiwanQingPath.style.opacity = (currentYear >= 1945 && currentYear < 1946) ? '.92' : '0';
+  if (!qingInit){
+    qingInit = true; qingCur = idx;
+    setQingShape(idx);
+    MAP.groups.qingLost.style.display = 'none';
+    return;
+  }
+  if (idx !== qingCur){
+    const prev = qingCur;
+    const boundaryYear = (idx >= 0 && QPHASES[idx]) ? QPHASES[idx].from : 1946;
+    const jump = Math.abs(currentYear - boundaryYear) > 2;
+    if (jump || idx < prev || prev < 0 || idx < 0){
+      MAP.groups.qingLost.style.display = 'none';
+      qingLostOn = false;
+    } else {
+      MAP.qingLostPath.setAttribute('d', phasePath(QPHASES[prev].rings));
+      MAP.groups.qingLost.style.display = '';
+      MAP.groups.qingLost.style.opacity = '0.9';
+      MAP.groups.qingLost.style.transition = 'none';
+      MAP.groups.qingLost.style.transform = 'none';
+      requestAnimationFrame(() => {
+        MAP.groups.qingLost.style.transition = 'transform 1.4s ease';
+        MAP.groups.qingLost.style.transform = 'translate(26px,-16px) scale(1.02)';
+      });
+      qingLostStart = now;
+      qingLostOn = true;
+    }
+    setQingShape(idx);
+    qingCur = idx;
+  }
+  updateWarlords();
+  updateFactions();
+  updateSitesRoutes();
+  if (qingLostOn){
+    const e = now - qingLostStart;
+    const op = (e < 1000) ? 0.9 : Math.max(0, 0.9 * (1 - (e-1000)/1500));
+    MAP.groups.qingLost.style.opacity = op;
+    if (op <= 0){ qingLostOn = false; MAP.groups.qingLost.style.display = 'none'; }
+  }
+}
+
+function factionPhaseAt(y){
+  return (window.FACTION_PHASES || []).find(p => y >= p.from && y < p.to) || null;
+}
+function pointInRing(lon, lat, ring){
+  let inside = false;
+  for (let i=0,j=ring.length-1;i<ring.length;j=i++){
+    const xi=ring[i][0], yi=ring[i][1], xj=ring[j][0], yj=ring[j][1];
+    if (((yi>lat)!==(yj>lat)) && (lon < (xj-xi)*(lat-yi)/(yj-yi)+xi)) inside = !inside;
+  }
+  return inside;
+}
+function occupationForProvince(name){
+  if (!name) return null;
+  if (/台湾/.test(name) && currentYear >= 1895 && currentYear < 1945) return {name:'日占台湾', color:'#a85a32'};
+  if (/香港/.test(name) && currentYear < 1997) return {name:'英占香港', color:'#7d6bff'};
+  if (/澳门/.test(name) && currentYear < 1999) return {name:'葡占澳门', color:'#9a8f7f'};
+  if (/辽宁|吉林|黑龙江/.test(name) && currentYear >= 1931 && currentYear < 1945) return {name:'日占东北', color:'#a85a32'};
+  return null;
+}
+function distToSegment(px, py, ax, ay, bx, by){
+  const dx = bx-ax, dy = by-ay;
+  const len = dx*dx + dy*dy;
+  let t = len ? ((px-ax)*dx + (py-ay)*dy) / len : 0;
+  t = Math.max(0, Math.min(1, t));
+  const x = ax + t*dx, y = ay + t*dy;
+  return Math.hypot(px-x, py-y);
+}
+function distanceToRoute(lon, lat, points){
+  let best = 1e9, at = null;
+  for (let i=1;i<points.length;i++){
+    const a=points[i-1], b=points[i];
+    const d = distToSegment(lon,lat,a[0],a[1],b[0],b[1]);
+    if (d < best){ best = d; at = [a[0]+(b[0]-a[0])*(d === 0 ? 0 : 0.5), a[1]+(b[1]-a[1])*0.5]; }
+  }
+  return {d:best, at};
+}
+function provinceAt(lon, lat){
+  for (const f of (window.CHINA_MAP || [])){
+    if (!f.p) continue;
+    for (const poly of f.p){
+      const ring = poly[0];
+      if (ring && pointInRing(lon, lat, ring)) return f.n;
+    }
+  }
+  return null;
+}
+function mapScreenToLonLat(sx, sy){
+  const r = mapScreenScale();
+  const mx = MAP.view.cx - r.w/2 + (sx - r.ox)/r.scale;
+  const my = MAP.view.cy - r.h/2 + (sy - r.oy)/r.scale;
+  return [mx / CH.k + CH.lon0, CH.lat1 - my / CH.k];
+}
+
+function questChapterKey(ev){
+  const kp = (window.KAODIAN || {})[ev.id];
+  const fb = (window.KAODIAN_FALLBACK || {})[ev.era] || '史纲';
+  const ch = kp ? kp.ch : fb;
+  const parts = ch.split('；');
+  return (activeTrack === 'mao' && parts.find(x => x.includes('毛中特'))) || parts[0];
+}
+function defaultMainTask(ev){
+  const y = ev.year;
+  if (y < 1840) return '近代前夜：封建社会内部危机加深，世界资本主义扩张；中国面临被动卷入世界的压力。';
+  if (y < 1919) return '反帝反封建，争取民族独立和人民解放；旧民主主义革命由农民阶级、地主阶级洋务派、资产阶级先后探索，均未成功。';
+  if (y < 1949) return '无产阶级领导的反帝反封建反官僚资本主义革命，争取民族独立和人民解放，建立新中国。';
+  if (y < 1956) return '从新民主主义向社会主义过渡，完成社会主义改造，确立社会主义制度。';
+  if (y < 1978) return '探索社会主义建设道路，发展生产力，巩固社会主义制度。';
+  if (y < 2012) return '改革开放，建设中国特色社会主义，解放和发展生产力，实现共同富裕。';
+  return '实现中华民族伟大复兴，推进中国式现代化，全面建设社会主义现代化国家。';
+}
+function periodBackground(ev){
+  const y = ev.year;
+  if (y < 1840) return '清朝封建统治衰落，世界资本主义扩张，中国仍处于闭关自守的封建社会。';
+  if (y < 1919) return '鸦片战争后中国逐步沦为半殖民地半封建社会，民族危机不断加深，各阶级先后探索救国道路。';
+  if (y < 1949) return '半殖民地半封建社会；民族矛盾与阶级矛盾交织，中国革命进入新民主主义阶段。';
+  if (y < 1956) return '新中国成立，人民民主专政建立，国民经济恢复，中国开始向社会主义过渡。';
+  if (y < 1978) return '社会主义制度确立，开始全面建设社会主义，探索中经历曲折。';
+  if (y < 2012) return '改革开放和社会主义现代化建设新时期，中国特色社会主义形成和发展。';
+  return '中国特色社会主义新时代，中华民族伟大复兴进入关键期。';
+}
+function periodContradiction(ev){
+  const y = ev.year;
+  if (y < 1840) return '封建制度与资本主义萌芽、闭关政策与外来冲击之间的矛盾。';
+  if (y < 1919) return '帝国主义与中华民族、封建主义与人民大众的矛盾。';
+  if (y < 1927) return '帝国主义与中华民族、封建主义与人民大众的矛盾。';
+  if (y < 1945) return '日本帝国主义与中华民族的民族矛盾，以及封建主义与人民大众的阶级矛盾。';
+  if (y < 1949) return '帝国主义、封建主义、官僚资本主义与人民大众的矛盾。';
+  if (y < 1956) return '工人阶级与资产阶级、社会主义道路与资本主义道路的矛盾。';
+  if (y < 1978) return '人民对于经济文化迅速发展的需要同当前经济文化不能满足人民需要的状况之间的矛盾。';
+  if (y < 2012) return '人民日益增长的物质文化需要同落后的社会生产之间的矛盾。';
+  return '人民日益增长的美好生活需要和不平衡不充分的发展之间的矛盾。';
+}
+function buildHistoryTasks(ev){
+  const custom = (window.HISTORY_TASKS || {})[ev.id] || {};
+  const task = custom.main || defaultMainTask(ev);
+  let sides = custom.sides;
+  if (!sides){
+    sides = (window.EVENT_FACTS || {})[ev.id] || [ev.sign];
+  }
+  const seen = new Set();
+  sides = sides.filter(x => { if (!x || seen.has(x)) return false; seen.add(x); return true; });
+  return {
+    periodFallback: !custom.background || !custom.contradiction || !custom.sides,
+    background: custom.background || periodBackground(ev),
+    contradiction: custom.contradiction || periodContradiction(ev),
+    task,
+    sides
+  };
+}
+function renderQuest(){
+  const panel = document.getElementById('questPanel');
+  if (!panel) return;
+  if (!questEnabled || !activeId){ panel.classList.add('hidden'); return; }
+  const ev = EVENTS.find(e => e.id === activeId);
+  if (!ev){ panel.classList.add('hidden'); return; }
+  const tasks = buildHistoryTasks(ev);
+  document.getElementById('qpEvent').textContent = ev.title;
+  document.getElementById('qpChapter').innerHTML = '考点：' + esc(questChapterKey(ev)) + (tasks.periodFallback ? ' <span class="qpPeriodNote">（按时期概括）</span>' : '');
+  document.getElementById('qpBackground').innerHTML = rich(tasks.background);
+  document.getElementById('qpContradiction').innerHTML = rich(tasks.contradiction);
+  document.getElementById('qpTask').innerHTML = rich(tasks.task);
+  document.getElementById('qpBody').innerHTML = '<ul class="qpSideList">' +
+    tasks.sides.map(x => '<li>' + rich(x) + '</li>').join('') + '</ul>';
+  document.getElementById('questPanel').classList.remove('hidden');
+}
+function hideQuest(){ const p = document.getElementById('questPanel'); if (p) p.classList.add('hidden'); }
+function syncQuest(){
+  if (!questEnabled || !activeId){ questEventId = activeId; hideQuest(); return; }
+  if (activeId !== questEventId){
+    questEventId = activeId;
+    renderQuest();
+  }
+}
+const questPanelEl = document.getElementById('questPanel');
+if (questPanelEl){
+  questPanelEl.addEventListener('wheel', (e) => {
+    if (questPanelEl.scrollHeight > questPanelEl.clientHeight + 2){
+      e.stopPropagation();
+    }
+  }, {passive:true});
+}
+
+const questChk = document.getElementById('questChk');
+if (questChk){
+  questChk.addEventListener('change', () => {
+    questEnabled = questChk.checked;
+    if (!questEnabled) hideQuest();
+    else { questEventId = null; syncQuest(); }
+    const ev = activeId ? EVENTS.find(e => e.id === activeId) : null;
+    if (ev) showBubbles(ev);
+  });
+}
+
+function lightenColor(hex, amt){
+  const h = String(hex || '#ffffff').replace('#','');
+  if (h.length !== 6) return '#ffffff';
+  const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+  const f = Math.max(0, Math.min(1, amt));
+  const L = v => Math.round(v + (255 - v) * f).toString(16).padStart(2,'0');
+  return '#' + L(r) + L(g) + L(b);
+}
+function updateFactions(){
+  if (!MAP.factionEls || !MAP.groups.factions) return;
+  const ph = factionMode ? factionPhaseAt(currentYear) : null;
+  const direct = !!(ph && ph.from >= 1912);
+  const qingDirect = !!(ph && ph.from < 1912 && MAP.qingProvincePaths && MAP.qingProvincePaths.length);
+
+  if (qingDirect){
+    // 清代：直接把历史省块按势力改色，不再叠半透明蒙板
+    MAP.factionDirect = false;
+    MAP.groups.base.style.display = 'none';
+    MAP.factionEls.forEach(o => { o.path.style.opacity = '0'; });
+    const histAlias = {
+      '河北省':'直隶','辽宁省':'奉天','吉林省':'吉林','黑龙江省':'黑龙江',
+      '新疆维吾尔自治区':'新疆','西藏自治区':'西藏','内蒙古自治区':'内蒙古',
+      '山东省':'山东','山西省':'山西','河南省':'河南','陕西省':'陕西','甘肃省':'甘肃',
+      '青海省':'青海','四川省':'四川','云南省':'云南','贵州省':'贵州','广西壮族自治区':'广西',
+      '广东省':'广东','福建省':'福建','浙江省':'浙江','江西省':'江西','湖南省':'湖南',
+      '湖北省':'湖北','安徽省':'安徽','江苏省':'江苏','台湾省':'台湾（日占）'
+    };
+    const byHist = {};
+    const histNames = new Set(MAP.qingProvincePaths.map(o => o.name));
+    ph.factions.forEach(f => f.prov.forEach(n => {
+      const hn = histAlias[n] || (histNames.has(n) ? n : null);
+      if (hn && !byHist[hn]) byHist[hn] = f;
+    }));
+    const qingF = ph.factions.find(f => /清朝/.test(f.name || ''));
+    const qingBaseColor = qingF ? qingF.color : QING_FILL;
+    MAP.qingProvincePaths.forEach(o => {
+      const f = byHist[o.name];
+      o.path.setAttribute('fill', f ? f.color : qingBaseColor);
+      o.path.setAttribute('fill-opacity', '1');
+      o.path.setAttribute('stroke', '#e2cfa7');
+      o.path.setAttribute('stroke-opacity', '.95');
+      if (currentYear >= 1895 && currentYear < 1912 && /台湾/.test(o.name)){
+        o.path.setAttribute('fill', '#a85a32');
+      }
+    });
+  } else if (direct){
+    MAP.factionDirect = true;
+    // 直接改底图省份颜色：显示现代省界底图，隐藏清代/民国整体轮廓
+    MAP.groups.base.style.display = '';
+    MAP.groups.taiwanBase.style.display = (currentYear >= 1895) ? '' : 'none';
+    MAP.groups.qingNow.style.display = 'none';
+    MAP.groups.qingLost.style.display = 'none';
+    MAP.groups.taiwanQing.style.opacity = '0';
+    MAP.factionEls.forEach(o => { o.path.style.opacity = '0'; });
+    const byProv = {};
+    ph.factions.forEach(f => f.prov.forEach(n => { if (!byProv[n]) byProv[n] = f; }));
+    Object.keys(MAP.provincePaths || {}).forEach(name => {
+      const path = MAP.provincePaths[name];
+      const f = byProv[name];
+      path.setAttribute('fill', f ? f.color : '#223a50');
+      path.setAttribute('stroke', f ? 'rgba(6,12,20,.55)' : '#3b5f7d');
+      path.setAttribute('opacity', '1');
+    });
+    if (currentYear >= 1895 && currentYear < 1945 && MAP.provincePaths['台湾省']){
+      MAP.provincePaths['台湾省'].setAttribute('fill', '#a85a32');
+      MAP.provincePaths['台湾省'].setAttribute('opacity', '1');
+    }
+    if (MAP.mongoliaHistPath){
+      const cf = ph.factions.find(f => /中华民国|国民政府|中华人民共和国/.test(f.name)) || null;
+      MAP.mongoliaHistPath.setAttribute('fill', cf ? cf.color : '#3b5266');
+      MAP.mongoliaHistPath.setAttribute('fill-opacity', '1');
+      MAP.mongoliaHistPath.setAttribute('stroke', 'rgba(6,12,20,.55)');
+      MAP.mongoliaHistPath.setAttribute('stroke-width', '.9');
+      MAP.mongoliaHistPath.setAttribute('opacity', '1');
+    }
+  } else {
+    if (MAP.qingProvincePaths && !ph){
+      MAP.qingProvincePaths.forEach(o => o.path.setAttribute('fill', QING_FILL));
+    }
+    if (MAP.factionDirect){
+      MAP.factionDirect = false;
+      Object.keys(MAP.provincePaths || {}).forEach(name => {
+        const path = MAP.provincePaths[name];
+        path.setAttribute('fill', '#223a50');
+        path.setAttribute('stroke', '#3b5f7d');
+        path.setAttribute('opacity', '1');
+      });
+    }
+    MAP.factionEls.forEach(o => { o.path.style.opacity = (ph && o.ph === ph) ? ((o.faction.alpha || .55).toString()) : '0'; });
+  }
+  if (MAP.occEls){
+    MAP.occEls.forEach(o => {
+      o.g.style.display = 'none';
+    });
+  }
+  MAP.factionLabels.forEach(o => {
+    const fname = o.faction ? (o.faction.name || '') : '';
+    const on = !!(showFactionNames && ph && o.ph === ph && o.faction && (o.faction.prov || []).length >= 3 && !/^(其他|英属香港|日占台湾|新疆)$/.test(fname) && !/伪满/.test(fname));
+    o.el.style.opacity = on ? '.9' : '0';
+  });
+  if (MAP.groups.warlords) MAP.groups.warlords.style.display = ph ? 'none' : '';
+  const wn = document.getElementById('warlordNote'); if (wn && ph) wn.classList.remove('show');
+  const note = document.getElementById('factionNote');
+  if (!note) return;
+  if (!ph){ note.classList.remove('show'); return; }
+  const key = ph.from + '-' + ph.to;
+  if (note.dataset.key !== key){
+    note.dataset.key = key;
+    note.querySelector('.fnTitle').textContent = ph.label;
+    note.querySelector('.fnList').innerHTML = ph.factions.map(f =>
+      '<span class="fnItem"><i class="fnDot" style="background:' + f.color + '"></i>' + esc(f.name) + '</span>'
+    ).join('');
+  }
+  note.classList.add('show');
+}
+
+function updateSitesRoutes(){
+  const y = currentYear;
+  const bn = document.getElementById('battleNote');
+  if (bn) bn.classList.toggle('show', y >= 1948.5 && y <= 1949.3);
+  if (MAP.siteEls){
+    MAP.siteEls.forEach(o => {
+      const on = y >= o.site.from && y <= o.site.to;
+      const et = MAP.eventTarget;
+      const same = et && Math.hypot(o.site.lon - et[0], o.site.lat - et[1]) < 0.2;
+      o.dot.style.opacity = (on && !same) ? '.95' : '0';
+      o.label.style.opacity = '0';
+    });
+  }
+  if (MAP.extraRouteEls){
+    const active = [];
+    MAP.extraRouteEls.forEach(o => {
+      const on = y >= o.route.from && y <= o.route.to;
+      if (on) active.push(o.route.name);
+      o.path.style.opacity = on ? '.95' : '0';
+      if (o.casing) o.casing.style.opacity = on ? '.55' : '0';
+      o.label.style.opacity = '0';
+    });
+    const fl = document.getElementById('mapFootL');
+    if (active.length && !MAP.route){
+      if (fl) fl.textContent = '路线：' + active.join(' / ') + '（悬停查看）';
+    } else if (fl && fl.textContent.indexOf('路线：') === 0 && !MAP.route){
+      fl.textContent = '—';
+    }
+  }
+}
+function updateWarlords(){
+  if (!MAP.warlordEls) return;
+  if (activeTrack === 'mao'){
+    MAP.warlordEls.forEach(o => o.path.style.opacity = '0');
+    MAP.warlordLabels.forEach(o => o.el.style.opacity = '0');
+    const n = document.getElementById('warlordNote'); if (n) n.classList.remove('show');
+    return;
+  }
+  const ph = WARLORD_PHASES.find(p => currentYear >= p.from && currentYear < p.to) || null;
+  MAP.warlordEls.forEach(o => {
+    const on = ph && o.ph === ph;
+    o.path.style.opacity = on ? '.42' : '0';
+  });
+  MAP.warlordLabels.forEach(o => {
+    const on = ph && o.ph === ph;
+    o.el.style.opacity = on ? '.85' : '0';
+  });
+  const note = document.getElementById('warlordNote');
+  if (!note) return;
+  if (!ph){ note.classList.remove('show'); delete note.dataset.key; return; }
+  const key = ph.from + '-' + ph.to;
+  if (!note.dataset.key || note.dataset.key !== key){
+    note.dataset.key = key;
+    note.querySelector('.wnTitle').textContent = ph.caption;
+    note.querySelector('.wnList').innerHTML = ph.factions.map(f =>
+      '<span class="wnItem"><i class="wnDot" style="background:' + f.color + '"></i>' + esc(f.name) + '</span>'
+    ).join('');
+    note.classList.add('show');
+    note.classList.remove('flash'); void note.offsetWidth; note.classList.add('flash');
+    setTimeout(() => note.classList.remove('flash'), 1600);
+  }
+  note.classList.add('show');
+}
+
+function updateRoute(){
+  if (!MAP.route) return;
+  const r = routeInterp(currentYear);
+  MAP.groups.routeDone.setAttribute('d', r.d);
+  MAP.groups.routeHead.setAttribute('cx', r.x);
+  MAP.groups.routeHead.setAttribute('cy', r.y);
+  const p = ROUTE_PTS[Math.min(r.seg, ROUTE_PTS.length-1)];
+  mapFootL.textContent = '长征 · ' + p.name;
+}
+const topBar = document.getElementById('topLeft');
+const topToggle = document.getElementById('topToggle');
+const topShow = document.getElementById('topShow');
+function setTopHidden(hide){
+  topBar.classList.toggle('hidden', hide);
+  topShow.classList.toggle('show', hide);
+  document.body.classList.toggle('topHidden', hide);
+  layout();
+}
+topToggle.addEventListener('click', () => setTopHidden(true));
+topShow.addEventListener('click', () => setTopHidden(false));
+
+const persistChk = document.getElementById('persistChk');
+if (persistChk){
+  persistChk.addEventListener('change', () => { persistLabels = persistChk.checked; update(); });
+}
+
+const factionNameChk = document.getElementById('factionNameChk');
+if (factionNameChk){
+  factionNameChk.addEventListener('change', () => {
+    showFactionNames = factionNameChk.checked;
+    updateFactions();
+  });
+}
+
+const factionChk = document.getElementById('factionChk');
+if (factionChk){
+  factionChk.addEventListener('change', () => {
+    factionMode = factionChk.checked;
+    hideTerrPopup();
+    MAP.lastFocus = null; MAP.forceFly = true; MAP.terrHoldUntil = 0;
+    updateFactions();
+    focusMap(activeId ? EVENTS.find(e => e.id === activeId) : null);
+    update();
+  });
+}
+
+mapChk.addEventListener('change', () => {
+  const on = mapChk.checked;
+  mapSvg.style.opacity = on ? '.72' : '0';
+  mapFade.style.display = on ? '' : 'none';
+  const md = document.getElementById('mapDrag');
+  if (md) md.style.display = on ? '' : 'none';
+  const zc = document.getElementById('mapZoomCtl');
+  if (zc) zc.style.display = on ? '' : 'none';
+  document.getElementById('mapInfo').style.display = on ? '' : 'none';
+  document.getElementById('mapFoot').style.display = on ? '' : 'none';
+});
+
+// 地图拖动
+const mapDrag = document.getElementById('mapDrag');
+let mapDragging = false, mapDragX = 0, mapDragY = 0, mapDragCx = 0, mapDragCy = 0;
+if (mapDrag){
+  mapDrag.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    mapDragging = true;
+    mapDragX = e.clientX; mapDragY = e.clientY;
+    mapDragCx = MAP.view.cx; mapDragCy = MAP.view.cy;
+    MAP.terrHoldUntil = 0;
+    mapDrag.classList.add('dragging');
+    mapDrag.setPointerCapture && mapDrag.setPointerCapture(e.pointerId);
+  });
+  mapDrag.addEventListener('pointermove', (e) => {
+    if (!mapDragging) return;
+    const r = mapScreenScale();
+    const dx = (e.clientX - mapDragX) / r.scale;
+    const dy = (e.clientY - mapDragY) / r.scale;
+    MAP.view.cx = mapDragCx - dx;
+    MAP.view.cy = mapDragCy - dy;
+    MAP.goal.cx = MAP.view.cx;
+    MAP.goal.cy = MAP.view.cy;
+    applyMapView();
+    updateTerrAnno();
+    updateEventAnno();
+    updateQingPhase(performance.now());
+  });
+  const endDrag = () => {
+    if (!mapDragging) return;
+    mapDragging = false;
+    mapDrag.classList.remove('dragging');
+  };
+  mapDrag.addEventListener('pointerup', endDrag);
+  mapDrag.addEventListener('pointercancel', endDrag);
+  mapDrag.addEventListener('pointermove', (e) => {
+    if (!factionMode || activeTrack === 'mao' || !factionPhaseAt(currentYear)){ return; }
+    const tip = document.getElementById('factionTip');
+    if (!tip) return;
+    const ll = mapScreenToLonLat(e.clientX, e.clientY);
+    const pname = provinceAt(ll[0], ll[1]);
+    const link = document.getElementById('siteLink');
+
+    // 优先：悬停到事件定位点，只显示地点名
+    if (MAP.eventTarget && MAP.eventPlace){
+      const ep = mapPointToScreen(MAP.eventTarget[0], MAP.eventTarget[1]);
+      if (Math.hypot(e.clientX - ep[0], e.clientY - ep[1]) < 14){
+        tip.innerHTML = '<b>' + esc(MAP.eventPlace) + '</b><br><span style="font-size:10px;color:#b8cfe4">事件地点</span>';
+        tip.style.display = 'block';
+        tip.style.left = (e.clientX + 14) + 'px';
+        tip.style.top = (e.clientY + 14) + 'px';
+        if (link) link.style.opacity = '0';
+        return;
+      }
+    }
+
+    // 优先：悬停到关键地点圆点
+    let hitSite = null, hitScreen = null, best = 14;
+    (MAP.siteEls || []).forEach(o => {
+      if (!(currentYear >= o.site.from && currentYear <= o.site.to)) return;
+      const sp = mapPointToScreen(o.site.lon, o.site.lat);
+      const d = Math.hypot(e.clientX - sp[0], e.clientY - sp[1]);
+      if (d < best){ best = d; hitSite = o.site; hitScreen = sp; }
+    });
+    if (hitSite){
+      tip.innerHTML = '<b>' + esc(hitSite.name) + '</b>' + (hitSite.detail ? '<br><span style="font-size:10px;color:#b8cfe4">' + esc(hitSite.detail) + '</span>' : '');
+      tip.style.display = 'block';
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top = (e.clientY + 14) + 'px';
+      if (link){
+        const lx = e.clientX + 14, ly = e.clientY + 18;
+        link.setAttribute('d', 'M ' + hitScreen[0] + ' ' + hitScreen[1] + ' L ' + lx + ' ' + ly);
+        link.style.opacity = '.9';
+      }
+      return;
+    }
+    // 路线悬停
+    let hitRoute = null, hitRouteAt = null, routeBest = 0.9;
+    (window.EXTRA_ROUTES || []).forEach(r => {
+      if (!(currentYear >= r.from && currentYear <= r.to)) return;
+      const q = distanceToRoute(ll[0], ll[1], r.points);
+      if (q.d < routeBest){ routeBest = q.d; hitRoute = r; hitRouteAt = q.at; }
+    });
+    if (!hitRoute && MAP.route){
+      const q = distanceToRoute(ll[0], ll[1], LONG_MARCH.map(p => [p.lon, p.lat]));
+      if (q.d < routeBest){ routeBest = q.d; hitRoute = {name:'长征路线 1934–1936', from:1934, to:1936}; hitRouteAt = q.at; }
+    }
+    if (hitRoute && hitRouteAt){
+      tip.innerHTML = '<b>' + esc(hitRoute.name) + '</b>';
+      tip.style.display = 'block';
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top = (e.clientY + 14) + 'px';
+      if (link){
+        const sp = mapPointToScreen(hitRouteAt[0], hitRouteAt[1]);
+        const lx = e.clientX + 14, ly = e.clientY + 18;
+        link.setAttribute('d', 'M ' + sp[0] + ' ' + sp[1] + ' L ' + lx + ' ' + ly);
+        link.style.opacity = '.9';
+      }
+      return;
+    }
+    if (link) link.style.opacity = '0';
+
+    const ph = factionPhaseAt(currentYear);
+    let fac = null;
+    if (pname && ph){ fac = ph.factions.find(f => f.prov.includes(pname)); }
+    const occ = occupationForProvince(pname);
+    if (!pname || (!fac && !occ)){ tip.style.display = 'none'; return; }
+    const c = occ ? occ.color : fac.color;
+    const n = occ ? occ.name : fac.name;
+    tip.innerHTML = '<i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:' + c + ';margin-right:5px"></i><b>' + esc(pname) + '</b> · <span style="color:' + c + '">' + esc(n) + '</span>';
+    tip.style.display = 'block';
+    tip.style.left = (e.clientX + 14) + 'px';
+    tip.style.top = (e.clientY + 14) + 'px';
+  });
+  mapDrag.addEventListener('pointerleave', () => {
+    const tip = document.getElementById('factionTip'); if (tip) tip.style.display = 'none';
+    const link = document.getElementById('siteLink'); if (link) link.style.opacity = '0';
+  });
+  mapDrag.addEventListener('wheel', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const f = Math.exp(e.deltaY * 0.0014);   // 向下滚缩小，向上滚放大
+    mapZoomAt(e.clientX, e.clientY, f);
+  }, {passive:false});
+  const zi = document.getElementById('mapZoomIn');
+  const zo = document.getElementById('mapZoomOut');
+  const zr = document.getElementById('mapZoomReset');
+  const ctl = document.getElementById('mapZoomCtl');
+  if (zi) zi.addEventListener('click', () => { const r = mapScreenScale(); mapZoomAt(r.rect.left + r.rect.width/2, r.rect.top + r.rect.height/2, 0.72); });
+  if (zo) zo.addEventListener('click', () => { const r = mapScreenScale(); mapZoomAt(r.rect.left + r.rect.width/2, r.rect.top + r.rect.height/2, 1.38); });
+  if (zr) zr.addEventListener('click', mapZoomReset);
+  if (ctl) ctl.style.display = '';
+}
+
+function wx(year){ return xOf(year); }
+function screenX(year){ return W/2 + (year - currentYear) * PPY; }
+function eraAt(year){ return ERAS.find(e => year >= e.start && year < e.end) || ERAS[ERAS.length-1]; }
+function eraById(id){ return ERAS.find(e => e.id === id) || (id === 'mao' ? MAO_ERA : ERAS[0]); }
+function displayEra(ev){
+  if (activeTrack === 'shi' && ev.shiEra) return eraById(ev.shiEra);
+  if (activeTrack === 'mao') return eraById('mao');
+  return eraById(ev.era);
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function rich(s){
+  let out = esc(s);
+  const marks = [
+    ['半殖民地半封建','hl2'],['反帝反封建','hl'],['两大历史任务','hl'],
+    ['主要矛盾','hl'],['根本任务','hl'],['民族独立','hl'],['人民解放','hl'],
+    ['中国式现代化','hl'],['中华民族伟大复兴','hl'],['确立','hl'],
+    ['失败','hl3'],['局限性','hl3'],['错误','hl3'],['侵略','hl3'],
+    ['社会主义','hl2'],['改革开放','hl2'],['市场经济','hl2'],['统一战线','hl2']
+  ];
+  for (const [k,cls] of marks){
+    const ek = esc(k);
+    out = out.split(ek).join('<span class="' + cls + '">' + ek + '</span>');
+  }
+  return out;
+}
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+/* ===================== 构建 ===================== */
+function layout(){
+  W = window.innerWidth; H = window.innerHeight;
+  axisY = Math.round(H * 0.74);
+  svg.setAttribute('width', W); svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', '0 0 '+W+' '+H);
+  buildStatic();
+  buildTimeline();
+  buildProgress();
+  updateBubblesPosition();
+  update();
+}
+
+function buildStatic(){
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.innerHTML =
+    '<defs>'+
+      '<linearGradient id="rail" x1="0" x2="1"><stop offset="0" stop-color="#8ea4bb"/><stop offset=".55" stop-color="#dbe7f3"/><stop offset="1" stop-color="#ffffff"/></linearGradient>'+
+      '<filter id="glow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+      '<marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8 z" fill="#bcd6ef"/></marker>'+
+    '</defs>'+
+    '<line class="rail-glow" x1="0" y1="'+axisY+'" x2="'+(W-34)+'" y2="'+axisY+'" stroke="url(#rail)" stroke-width="11" stroke-linecap="round"/>'+
+    '<line x1="0" y1="'+axisY+'" x2="'+(W-34)+'" y2="'+axisY+'" stroke="rgba(10,16,22,.55)" stroke-width="3"/>'+
+    '<polygon points="'+(W-30)+','+(axisY-11)+' '+(W-8)+','+axisY+' '+(W-30)+','+(axisY+11)+'" fill="#eaf3fc"/>'+
+    '<g id="centerMark">'+
+      '<polygon points="'+(W/2-7)+','+(axisY-16)+' '+(W/2+7)+','+(axisY-16)+' '+(W/2)+','+(axisY-4)+'" fill="#9fd4ff" opacity=".95"/>'+
+    '</g>';
+  svg.appendChild(g);
+  const tl = document.createElementNS('http://www.w3.org/2000/svg','g');
+  tl.setAttribute('id','tlLayer');
+  svg.appendChild(tl);
+  // world & arcs layer
+  const world = document.createElementNS('http://www.w3.org/2000/svg','g');
+  world.setAttribute('id','world');
+  svg.appendChild(world);
+  const arcs = document.createElementNS('http://www.w3.org/2000/svg','g');
+  arcs.setAttribute('id','arcs');
+  svg.appendChild(arcs);
+}
+
+function buildTimeline(){
+  const tl = document.getElementById('tlLayer');
+  tl.innerHTML = '';
+  // 时代色带
+  ERABARS = [];
+  ERAS.forEach(e => {
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('y1', axisY); line.setAttribute('y2', axisY);
+    line.setAttribute('stroke', e.color); line.setAttribute('stroke-width','9');
+    line.setAttribute('stroke-linecap','butt'); line.setAttribute('opacity', activeTrack === 'mao' ? '0' : '.22');
+    tl.appendChild(line);
+    ERABARS.push({line, start:e.start, end:e.end});
+  });
+  // 时代小标签
+  ERALABELS = [];
+  const shortNames = {pre:'前史', up:'上编', mid:'中编', d1:'下编', d2:'改革开放', new:'新时代'};
+  ERAS.forEach(e => {
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('class','era-tag');
+    t.textContent = shortNames[e.id] || e.name;
+    tl.appendChild(t);
+    ERALABELS.push({el:t, start:e.start, end:e.end});
+  });
+  // 刻度池
+  TICKS = [];
+  for (let i=0; i<120; i++){
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('y1', axisY-6); line.setAttribute('y2', axisY+6);
+    line.setAttribute('stroke','#4d5f74'); line.setAttribute('opacity','0');
+    const tx = document.createElementNS('http://www.w3.org/2000/svg','text');
+    tx.setAttribute('y', axisY+26); tx.setAttribute('text-anchor','middle');
+    tx.setAttribute('class','tick-year'); tx.setAttribute('opacity','0');
+    tl.appendChild(line); tl.appendChild(tx);
+    TICKS.push({line, label:tx});
+  }
+  // 节点：有日期的按月份/日期在年内定位；同年不再挤在一点
+  const shown = EVENTS.filter(ev => inTrack(ev, activeTrack));
+  const byDate = {};
+  shown.forEach(e => {
+    const d = EVENT_DATE[e.id];
+    e._hasDate = !!d;
+    if (d){
+      e._dateKey = e.year + '-' + d[0] + '-' + d[1];
+      e._pos = e.year + ((d[0] - 1) + (d[1] || 15) / 31) / 12;
+    } else {
+      e._dateKey = e.year + '-x';
+      e._pos = e.year + 0.5;
+    }
+    (byDate[e._dateKey] = byDate[e._dateKey] || []).push(e);
+  });
+  Object.keys(byDate).forEach(k => {
+    const arr = byDate[k];
+    arr.forEach((e, i) => {
+      e._lane = 0;
+      e._labelText = e.title;
+      e._labelLane = i;
+      e._sameDateCount = arr.length;
+    });
+    if (arr.length > 1){
+      arr[0]._labelText = arr[0].title + (arr[0]._hasDate ? '（同日' + arr.length + '项）' : '（同年' + arr.length + '项）');
+    }
+  });
+  nodes = {};
+  shown.slice().sort((a,b) => a._pos - b._pos).forEach(ev => {
+    const era = displayEra(ev);
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','ev'); g.setAttribute('data-id', ev.id);
+    const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('r', 4); dot.setAttribute('fill', era.color);
+    dot.setAttribute('class','ev-dot');
+    g.appendChild(dot);
+    const nameEl = document.createElementNS('http://www.w3.org/2000/svg','text');
+    const lines = ev._labelLines;
+    if (lines && lines.length > 1){
+      nameEl.setAttribute('y', axisY - 18 - (lines.length - 1) * 20);
+      lines.forEach((line, li) => {
+        const ts = document.createElementNS('http://www.w3.org/2000/svg','tspan');
+        ts.setAttribute('dy', li ? 20 : 0);
+        ts.textContent = line;
+        nameEl.appendChild(ts);
+      });
+    } else {
+      nameEl.setAttribute('y', axisY - 18);
+      nameEl.textContent = ev._labelText || ev.title;
+    }
+    nameEl.setAttribute('text-anchor','middle');
+    nameEl.setAttribute('class','ev-name');
+    nameEl.setAttribute('opacity','0');
+    g.appendChild(nameEl);
+    tl.appendChild(g);
+    nodes[ev.id] = {dot, nameEl, ev, g};
+  });
+}
+
+function buildProgress(){
+  track.querySelectorAll('.seg').forEach(n => n.remove());
+  for (const e of ERAS){
+    const d = document.createElement('div');
+    d.className = 'seg';
+    d.style.left = (xOf(e.start)/TOTAL_X*100) + '%';
+    d.style.width = ((xOf(e.end)-xOf(e.start))/TOTAL_X*100) + '%';
+    d.style.background = e.color;
+    d.style.opacity = '.45';
+    track.appendChild(d);
+  }
+}
+
+/* ===================== 更新 ===================== */
+function eventAt(ev){
+  if (!ev) return null;
+  if (ev.loc && isFinite(ev.loc.lon) && isFinite(ev.loc.lat)) return [ev.loc.lon, ev.loc.lat];
+  const t = ev.title || '';
+  const rules = [
+    [/虎门/, [113.70,22.80]], [/南京|临时约法|中华民国/, [118.80,32.10]],
+    [/上海|一大|二大|新青年|五卅|江南制造|轮船招商/, [121.50,31.20]],
+    [/广州|三大|国共合作|北伐|国民党一大/, [113.30,23.10]],
+    [/武昌|辛亥|武汉|八七|五大|大革命/, [114.30,30.60]],
+    [/南昌/, [115.90,28.70]], [/井冈山|古田|星星之火/, [114.10,26.60]],
+    [/瑞金|长征开始/, [116.00,25.90]], [/遵义/, [106.90,27.70]],
+    [/西安/, [108.90,34.30]], [/延安|持久战|七大|整风|实践论|新民主主义论|论联合政府/, [109.50,36.60]],
+    [/沈阳|九一八/, [123.40,41.80]], [/锦州|三大战役/, [121.10,41.10]], [/徐州/, [117.30,34.30]],
+    [/卢沟桥|七七|北京|戊戌|义和团|辛丑|五四|新文化|一二九|政协|人大|八大|三中全会|十八大|十九大|二十大|六中|五中|四中|三中|建党|开国|中华人民共和国|马戛尔尼|同盟会/, [116.40,39.90]],
+    [/福州|船政/, [119.30,26.00]], [/汉阳/, [114.30,30.60]],
+    [/新疆|伊犁|左宗棠/, [87.60,43.80]], [/台湾|马关|日本侵台/, [121.00,23.70]],
+    [/香港/, [114.17,22.32]], [/深圳|特区|南方谈话/, [114.10,22.50]],
+    [/酒泉|两弹/, [98.50,39.70]], [/威海|北洋海军|甲午/, [122.10,37.50]],
+    [/瑷珲/, [127.50,50.30]], [/北京条约/, [116.40,39.90]],
+    [/太平天国|金田|天京/, [118.78,32.06]], [/同盟会|中华民国|临时约法/, [118.78,32.06]],
+    [/澳门/, [113.55,22.19]], [/抗战胜利|解放战争/, [118.78,32.06]],
+    [/一五|三大改造|八大|加入WTO|科学发展观|建党百年/, [116.40,39.90]]
+  ];
+  for (const [re, at] of rules) if (re.test(t)) return at;
+  if (/会议|大会|全会|战争|运动|起义|条约|事变|革命|成立|改造|计划|回归|合作|谈话/.test(t)) return [116.40,39.90];
+  return null;
+}
+function eventPlaceFor(ev){
+  if (ev && ev.loc && ev.loc.place) return ev.loc.place;
+  return '北京';
+}
+function showEventPopup(ev){
+  const el = document.getElementById('eventPopup');
+  if (!el || !ev) return hideEventPopup();
+  document.getElementById('epYear').textContent = eventWhen(ev);
+  document.getElementById('epTitle').textContent = ev.title;
+  document.getElementById('epDetail').textContent = ev.sign;
+  const epPlace = document.getElementById('epPlace');
+  if (epPlace) epPlace.textContent = '地点：' + eventPlaceFor(ev);
+  MAP.eventTarget = eventAt(ev);
+  MAP.eventPlace = eventPlaceFor(ev);
+  updateSitesRoutes();
+  el.classList.add('show');
+  updateEventAnno();
+}
+function hideEventPopup(){
+  const el = document.getElementById('eventPopup');
+  if (el) el.classList.remove('show');
+  MAP.eventTarget = null;
+  updateSitesRoutes();
+  ['eventLine','eventDot','eventAnchor'].forEach(id => {
+    const n = document.getElementById(id); if (n) n.style.opacity = '0';
+  });
+}
+function updateEventAnno(){
+  const el = document.getElementById('eventPopup');
+  const line = document.getElementById('eventLine');
+  const dot = document.getElementById('eventDot');
+  const anchor = document.getElementById('eventAnchor');
+  if (!el || !line || !dot || !anchor) return;
+  if (!el.classList.contains('show') || !MAP.eventTarget){
+    line.style.opacity='0'; dot.style.opacity='0'; anchor.style.opacity='0';
+    if (MAP.groups.eventPlace) MAP.groups.eventPlace.style.opacity='0'; return;
+  }
+  const r = el.getBoundingClientRect();
+  const sx = r.left - 2, sy = r.top + 45;
+  const target = mapPointToScreen(MAP.eventTarget[0], MAP.eventTarget[1]);
+  const tx = target[0], ty = target[1];
+  const dx = tx - sx, dy = ty - sy;
+  const mx = sx + dx*0.5, my = Math.min(sy,ty) - Math.min(90, Math.abs(dx)*0.22 + 20);
+  line.setAttribute('d', 'M '+sx+' '+sy+' Q '+mx+' '+my+' '+tx+' '+ty);
+  line.style.opacity = '.9';
+  anchor.setAttribute('cx', sx); anchor.setAttribute('cy', sy); anchor.style.opacity='1';
+  dot.setAttribute('cx', tx); dot.setAttribute('cy', ty); dot.style.opacity='1';
+  if (MAP.groups.eventPlace) MAP.groups.eventPlace.style.opacity = '0';
+}
+function relationLabel(a, b){
+  const m = window.RELATIONS || {};
+  return m[a + '>' + b] || m[b + '>' + a] || '关联';
+}
+function relationColor(label){
+  if (/(失败|破产|阻碍|被迫|危机|错误|镇压)/.test(label)) return '#ff8f8f';
+  if (/(结果|背景|导火索|原因|转折|总结|思想准备|理论|决战|条件)/.test(label)) return '#ffd166';
+  if (/(推动|促进|发展|成果|实践|合作|指导|路线|政策|筹备|巩固|收复|反抗|继承|探索|保障|完成|部署|配套|加剧|刺激|民族矛盾)/.test(label)) return '#7fd6a7';
+  return '#b8cbe0';
+}
+function baseTimelineTarget(y){
+  let t = 12;
+  if (y >= 1840 && y < 1919) t = 22;
+  if (y >= 1919 && y < 1949) t = 80;
+  if (y >= 1931 && y < 1946) t = 104;
+  if (y >= 1921 && y < 1928) t = 124;
+  return t;
+}
+function update(){
+  // 自动缩放：密集期把整个轴（刻度+节点一起）拉长；axisZoom 为用户滚轮缩放
+  const target = baseTimelineTarget(currentYear) * axisZoom;
+  PPY += (target - PPY) * (playing ? 0.06 : 0.22);
+  const viewStart = currentYear - W/(2*PPY);
+  const viewEnd = currentYear + W/(2*PPY);
+
+  // 时代色带
+  ERABARS.forEach(e => {
+    e.line.setAttribute('x1', W/2 + (e.start-currentYear)*PPY);
+    e.line.setAttribute('x2', W/2 + (e.end-currentYear)*PPY);
+  });
+  ERALABELS.forEach(o => {
+    const width = (o.end - o.start) * PPY;
+    const cx = W/2 + ((o.start + o.end)/2 - currentYear) * PPY;
+    o.el.setAttribute('x', cx);
+    o.el.setAttribute('y', axisY - 34);
+    o.el.setAttribute('opacity', (activeTrack === 'mao') ? '0' : (width > 140 ? '.6' : '0'));
+  });
+
+  // 刻度：按 PPY 自动选步长
+  const cands = [1,2,5,10,20,50,100];
+  let step = 10;
+  for (const c of cands){ if (c * PPY >= 90){ step = c; break; } }
+  let y = Math.max(START, Math.ceil(viewStart / step) * step);
+  const tickEnd = Math.min(END, viewEnd);
+  let ti = 0;
+  for (; y <= tickEnd && ti < TICKS.length; y += step){
+    const x = W/2 + (y - currentYear) * PPY;
+    const t = TICKS[ti++];
+    t.line.setAttribute('x1', x); t.line.setAttribute('x2', x);
+    t.line.setAttribute('opacity', '.55');
+    t.label.setAttribute('x', x); t.label.textContent = y;
+    t.label.setAttribute('opacity', '.7');
+  }
+  for (; ti < TICKS.length; ti++){
+    TICKS[ti].line.setAttribute('opacity','0');
+    TICKS[ti].label.setAttribute('opacity','0');
+  }
+
+  // 节点（与刻度同一坐标）
+  let best = null, bestD = 1e9;
+  for (const ev of EVENTS){
+    const n = nodes[ev.id]; if (!n) continue;
+    const x = W/2 + (ev._pos - currentYear) * PPY;
+    const d = Math.abs(x - W/2);
+    if (d < bestD){ bestD = d; best = ev; }
+  }
+  for (const ev of EVENTS){
+    const n = nodes[ev.id]; if (!n) continue;
+    const x = W/2 + (ev._pos - currentYear) * PPY;
+    const d = Math.abs(x - W/2);
+    const isActive = best && best.id === ev.id && d < 90;
+    const r = 4 + (1 - Math.min(1, d/90)) * 4.5;
+    n.dot.setAttribute('cx', x);
+    n.dot.setAttribute('cy', axisY);
+    n.dot.setAttribute('r', r);
+    n.dot.setAttribute('opacity', d < 420 ? '1' : '0.45');
+    n.dot.setAttribute('stroke', isActive ? '#fff' : 'none');
+    n.dot.setAttribute('stroke-width', isActive ? '1.6' : '0');
+    n.dot.classList.toggle('active', !!isActive);
+  }
+  // 节点上方的事件名：按文字宽度避让，缩放时也不重叠
+  const ordered = Object.values(nodes).sort((a,b) => a.ev._pos - b.ev._pos);
+  const shownLabels = [];
+  for (const n of ordered){
+    const x = W/2 + (n.ev._pos - currentYear) * PPY;
+    const d = Math.abs(x - W/2);
+    if (n.ev._labelLane > 0){ n.nameEl.setAttribute('opacity','0'); continue; }
+    const isAct = !!(best && best.id === n.ev.id && d < 90);
+    let op = persistLabels ? ((x > -70 && x < W + 70) ? 0.9 : 0) : (d < 520 ? 0.88 : 0);
+    const lines = n.ev._labelLines || [n.ev.title];
+    const maxLen = Math.max.apply(null, lines.map(l => String(l).length));
+    const labelW = Math.min(320, Math.max(56, maxLen * 16));
+    const overlaps = shownLabels.filter(o => Math.abs(x - o.x) < Math.max((labelW + o.w) / 2 + 20, 190));
+    if (op > 0 && overlaps.length && !isAct) op = 0;
+    if (op > 0){
+      n.nameEl.setAttribute('x', x);
+      n.nameEl.querySelectorAll('tspan').forEach(ts => ts.setAttribute('x', x));
+      if (isAct){
+        overlaps.forEach(o => o.el.setAttribute('opacity','0'));
+      }
+      shownLabels.push({x, w: labelW, el: n.nameEl});
+    }
+    n.nameEl.setAttribute('opacity', op.toFixed(2));
+  }
+  if (best && bestD < 90){
+    if (activeId !== best.id){ activeId = best.id; showBubbles(best); }
+  } else if (activeId !== null){
+    activeId = null; hideBubbles();
+  }
+
+  syncQuest();
+  if (activeId){ const ae = EVENTS.find(e => e.id === activeId); if (ae) showEventPopup(ae); } else hideEventPopup();
+
+  // 批注常驻：只要没离开这个节点/年份范围，就不自动消失
+  if (MAP.terrPopupActive && Math.abs(currentYear - MAP.terrPopupShownYear) > 0.02){
+    if (activeId !== MAP.terrPopupActiveId || Math.abs(currentYear - MAP.terrPopupYear) > 4.5){
+      hideTerrPopup();
+    }
+  }
+
+  // 关联虚线（active 为当前节点；常驻标注时绘制视口内所有节点的关系）
+  const arcs = document.getElementById('arcs');
+  arcs.innerHTML = '';
+  const arcLabelBoxes = [];
+  const drawnArcPairs = new Set();
+  function addArc(ev, rid, isActive){
+    const r = EVENTS.find(e => e.id === rid); if (!r) return;
+    const pairKey = [ev.id, rid].sort().join('|');
+    if (drawnArcPairs.has(pairKey)) return;
+    drawnArcPairs.add(pairKey);
+    const x0 = W/2 + (ev._pos - currentYear) * PPY;
+    const x1 = W/2 + (r._pos - currentYear) * PPY;
+    const span = Math.abs(x0 - x1);
+    if (span < 50) return;
+    const h = 44 + Math.min(160, span*0.22) + (isActive ? 0 : 10);
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d','M '+x1+' '+axisY+' Q '+((x1+x0)/2)+' '+(axisY-h)+' '+x0+' '+axisY);
+    path.setAttribute('class','arc');
+    path.setAttribute('stroke', displayEra(ev).color);
+    if (isActive) path.setAttribute('marker-end','url(#arrow)');
+    path.setAttribute('opacity', isActive ? '0.8' : '0.28');
+    arcs.appendChild(path);
+    const txt = relationLabel(ev.id, rid);
+    let lx = (x1+x0)/2, ly = axisY - h/2 - 4;
+    const lw = txt.length * 10 + 8;
+    let tries = 0;
+    while (tries < 5 && arcLabelBoxes.some(b => Math.abs(b.x-lx) < (b.w+lw)/2 + 5 && Math.abs(b.y-ly) < 15)){
+      ly -= 15; tries++;
+    }
+    if (tries < 5 && (isActive || Math.abs(lx - W/2) < W/2)){
+      arcLabelBoxes.push({x:lx, y:ly, w:lw});
+      const lab = document.createElementNS('http://www.w3.org/2000/svg','text');
+      lab.setAttribute('x', lx); lab.setAttribute('y', ly);
+      lab.setAttribute('text-anchor','middle');
+      lab.setAttribute('class','arc-lbl');
+      lab.setAttribute('fill', relationColor(txt));
+      lab.setAttribute('opacity', isActive ? '1' : '.55');
+      lab.textContent = txt;
+      arcs.appendChild(lab);
+    }
+  }
+  if (activeId && !persistLabels){
+    const ev = EVENTS.find(e => e.id === activeId);
+    const rels = new Set(ev.links || []);
+    EVENTS.forEach(e => { if ((e.links||[]).includes(ev.id)) rels.add(e.id); });
+    for (const rid of rels) addArc(ev, rid, true);
+  }
+  if (persistLabels){
+    const visible = EVENTS.filter(e => {
+      if (!nodes[e.id]) return false;
+      const x = W/2 + (e._pos - currentYear) * PPY;
+      return x > -120 && x < W + 120;
+    });
+    for (const ev of visible){
+      const rels = new Set(ev.links || []);
+      EVENTS.forEach(e => { if ((e.links||[]).includes(ev.id)) rels.add(e.id); });
+      for (const rid of rels){
+        addArc(ev, rid, false);
+      }
+    }
+  }
+
+
+  bigYear.textContent = Math.floor(currentYear + 0.001);
+  const activeEv = activeId ? EVENTS.find(e => e.id === activeId) : null;
+  if (activeTrack === 'mao' || (activeEv && (activeEv.track === 'mao'))){
+    eraName.textContent = '毛中特 · 会议 / 著作 / 理论成果 · 放大 ×' + (PPY/12).toFixed(1);
+  } else {
+    eraName.textContent = eraAt(currentYear).name + ' · 放大 ×' + (PPY/12).toFixed(1);
+  }
+  updateBubblesPosition();
+  thumb.style.left = ((currentYear - START)/(END - START) * 100) + '%';
+
+  const arcLegend = document.getElementById('arcLegend');
+  if (arcLegend) arcLegend.style.display = activeId ? 'block' : 'none';
+
+  const evFocus = activeId ? EVENTS.find(e => e.id === activeId) : null;
+  const routeNow = currentYear >= 1934.68 && currentYear <= 1936.9;
+  if (!tween && (evFocus !== MAP.lastFocus || routeNow !== MAP.lastRoute)){
+    MAP.lastFocus = evFocus; MAP.lastRoute = routeNow;
+    focusMap(evFocus);
+  }
+  if (MAP.route) updateRoute();
+
+  playBtn.textContent = playing ? '⏸ 暂停' : '▶ 播放';
+  dirBtn.textContent = dir > 0 ? '→ 正放' : '← 倒放';
+}
+
+function showBubbles(ev){
+  const era = displayEra(ev);
+  tbYear.textContent = eventWhen(ev);
+  tbName.textContent = ev.title;
+  const dbTitle = document.getElementById('dbTitle');
+  if (dbTitle) dbTitle.textContent = ev.title;
+  dbEra.textContent = era.name.split('·')[0].trim();
+  detailBubble.style.borderLeftColor = era.color;
+  dbEra.style.color = era.color;
+  dbEra.style.borderColor = era.color;
+  dbYear.textContent = eventWhen(ev);
+  dbSign.innerHTML = rich(ev.sign);
+  const factsEl = document.getElementById('dbFacts');
+  if (factsEl){
+    let facts = (window.EVENT_FACTS || {})[ev.id];
+    if (!facts){
+      const kp0 = (window.KAODIAN || {})[ev.id] || {};
+      facts = [];
+      facts.push('时间：' + eventWhen(ev));
+      if (kp0.pt) facts.push('关键词：' + kp0.pt);
+      if (!facts.length) facts.push(ev.sign);
+    }
+    factsEl.innerHTML = '<div class="dFactsHead">事件速览</div><ul>' +
+      facts.map(x => '<li>' + rich(x) + '</li>').join('') + '</ul>';
+    factsEl.style.display = questEnabled ? 'none' : 'block';
+  }
+
+  // 考点归属
+  const kpEl = document.getElementById('dbKp');
+  const kp = (window.KAODIAN || {})[ev.id];
+  const fb = (window.KAODIAN_FALLBACK || {})[ev.era] || '史纲';
+  if (kpEl){
+    const ch = kp ? kp.ch : fb;
+    const parts = ch.split('；');
+    const key = (activeTrack === 'mao' && parts.find(x => x.includes('毛中特'))) || parts[0];
+    const note = (window.KAODIAN_NOTE || {})[key] || {};
+    kpEl.innerHTML =
+      '<div class="dKpHead">考点</div>' +
+      '<div class="dKpMeta">' + esc(ch) + '</div>' +
+      (kp ? '<div class="dKpPoint">' + rich(kp.pt) + '</div>' : '') +
+      (note.kw ? '<div class="dKpKw">必背：' + rich(note.kw.join('、')) + '</div>' : '') +
+      (note.trap ? '<div class="dKpTrap">设错：' + rich(note.trap) + '</div>' : '') +
+      (note.essay ? '<div class="dKpEssay">分析题：' + rich(note.essay) + '</div>' : '') +
+      ((window.KAODIAN_DETAIL || {})[key] ? '<ul class="dKpList">' + (window.KAODIAN_DETAIL || {})[key].map(x => '<li>' + rich(x) + '</li>').join('') + '</ul>' : '');
+    kpEl.style.display = questEnabled ? 'none' : 'block';
+  }
+
+  // 同年事件：不再上下堆叠，卡片里列出
+  const grpEl = document.getElementById('dbGrp');
+  if (grpEl){
+    const same = EVENTS.filter(e => e.year === ev.year && inTrack(e, activeTrack));
+    grpEl.textContent = same.length > 1 ? '同年：' + same.map(e => e.title).join('、') : '';
+    grpEl.style.display = same.length > 1 ? 'block' : 'none';
+  }
+  const rels = new Set(ev.links||[]);
+  EVENTS.forEach(e => { if ((e.links||[]).includes(ev.id)) rels.add(e.id); });
+  const names = [...rels].map(id => (EVENTS.find(e=>e.id===id)||{}).title).filter(Boolean);
+  dbRel.textContent = names.length ? '关联：' + names.join('、') : '';
+  dbRel.style.display = names.length ? 'block' : 'none';
+  titleBubble.classList.add('show');
+  detailBubble.classList.add('show');
+}
+
+function hideBubbles(){
+  titleBubble.classList.remove('show');
+  detailBubble.classList.remove('show');
+}
+
+function updateBubblesPosition(){
+  if (!activeId) return;
+  detailBubble.style.left = (W > 1100) ? '530px' : '20px';
+  detailBubble.style.right = '20px';
+  detailBubble.style.top = (axisY + 34) + 'px';
+  detailBubble.style.bottom = '18px';
+}
+
+/* ===================== 动画 ===================== */
+function tick(ts){
+  if (!lastTs) lastTs = ts;
+  const dt = Math.min(0.06, (ts - lastTs)/1000);
+  lastTs = ts;
+  if (keyHoldDir){
+    const held = (performance.now() - keyHoldStart) / 1000;
+    const speed = (2.2 + 9.5 * held) * keyHoldBoost;
+    currentYear = clamp(currentYear + keyHoldDir * speed * dt, START, END);
+    playing = false;
+  } else if (tween){
+    const d = tween.target - currentYear;
+    if (Math.abs(d) < 0.08){ currentYear = tween.target; tween = null; }
+    else currentYear += d * Math.min(1, dt*7);
+  } else if (playing && performance.now() >= mapHoldUntil){
+    // 节点附近自动减速（不是暂停，避免卡住）
+    let factor = 1;
+    if (dwellEnabled){
+      let bestD = 1e9;
+      for (const ev of EVENTS){
+        const d = Math.abs(xOf(ev._pos) - xOf(currentYear));
+        if (d < bestD) bestD = d;
+      }
+      if (bestD < 26) factor = 0.3;
+      else if (bestD < 80) factor = 0.6;
+    }
+    currentYear += dir * BASE_SPEED * speedMul * factor * dt;
+    if (currentYear >= END){ currentYear = END; playing = false; }
+    if (currentYear <= START){ currentYear = START; playing = false; }
+  }
+  update();
+  mapTick();
+  updateQingPhase(performance.now());
+  updateTerritory(performance.now());
+  requestAnimationFrame(tick);
+}
+
+/* ===================== 交互 ===================== */
+document.querySelectorAll('#trackTabs button').forEach(b => {
+  b.addEventListener('click', () => {
+    activeTrack = b.dataset.track;
+    document.querySelectorAll('#trackTabs button').forEach(x => x.classList.toggle('on', x === b));
+    hideTerrPopup();
+    MAP.lastFocus = null; MAP.forceFly = true; MAP.terrHoldUntil = 0;
+    buildTimeline();
+    update();
+  });
+});
+
+playBtn.addEventListener('click', () => {
+  if (!playing && currentYear >= END){ currentYear = START; }
+  playing = !playing;
+  if (playing && currentYear >= END) currentYear = START;
+  update();
+});
+speedSel.addEventListener('change', () => { speedMul = parseFloat(speedSel.value); });
+dirBtn.addEventListener('click', () => { dir = -dir; update(); });
+dwellChk.addEventListener('change', () => { dwellEnabled = dwellChk.checked; });
+
+document.querySelectorAll('[data-jump]').forEach(b => {
+  b.addEventListener('click', () => {
+    const y = Number(b.dataset.jump);
+    MAP.forceFly = true;
+    MAP.terrHoldUntil = 0;
+    tween = { target: y };
+    playing = false;
+    update();
+  });
+});
+
+// 点击节点
+svg.addEventListener('click', (e) => {
+  const g = e.target.closest ? e.target.closest('.ev') : null;
+  if (!g || moved > 6) return;
+  const id = g.getAttribute('data-id');
+  const ev = EVENTS.find(z => z.id === id); if (!ev) return;
+  MAP.forceFly = true;
+  MAP.zoomToEvent = true;
+  MAP.lastFocus = null;
+  MAP.terrHoldUntil = 0;
+  tween = { target: ev._pos };
+  playing = false;
+  update();
+});
+
+// 拖动擦洗
+svg.addEventListener('pointerdown', (e) => {
+  if (e.target.closest && e.target.closest('.ev')) return;
+  dragging = true; dragStartX = e.clientX; dragStartYear = currentYear; moved = 0;
+  wasPlaying = playing; playing = false;
+  svg.setPointerCapture && svg.setPointerCapture(e.pointerId);
+});
+window.addEventListener('pointermove', (e) => {
+  if (!dragging) return;
+  const dx = e.clientX - dragStartX;
+  moved = Math.max(moved, Math.abs(dx));
+  currentYear = clamp(dragStartYear - dx/PPY, START, END);
+  update();
+});
+window.addEventListener('pointerup', () => {
+  if (!dragging) return;
+  dragging = false;
+  if (moved > 6) MAP.forceFly = true;
+  if (wasPlaying) playing = true;
+  update();
+});
+
+// 滚轮：坐标轴区域缩放时间轴；其他区域擦洗
+window.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const ax = (W > 1100 && e.clientX < 530) ? W/2 : e.clientX;
+  zoomTimelineAt(ax, e.deltaY);
+}, {passive:false});
+
+function zoomTimelineAt(clientX, deltaY){
+  const oldPPY = PPY;
+  const factor = Math.exp(-deltaY * 0.0015);
+  const nextZoom = clamp(axisZoom * factor, 0.45, 3.6);
+  if (Math.abs(nextZoom - axisZoom) < 0.001) return;
+  const yearAtCursor = currentYear + (clientX - W/2) / oldPPY;
+  axisZoom = nextZoom;
+  PPY = baseTimelineTarget(currentYear) * axisZoom;
+  currentYear = clamp(yearAtCursor - (clientX - W/2) / PPY, START, END);
+  update();
+}
+
+// 进度条
+function trackSeek(clientX){
+  const r = track.getBoundingClientRect();
+  const p = clamp((clientX - r.left) / r.width, 0, 1);
+  MAP.forceFly = true;
+  MAP.terrHoldUntil = 0;
+  currentYear = START + p * (END - START);
+  playing = false;
+  update();
+}
+track.addEventListener('pointerdown', (e) => { trackSeek(e.clientX); track.setPointerCapture && track.setPointerCapture(e.pointerId); });
+track.addEventListener('pointermove', (e) => { if (e.buttons & 1) trackSeek(e.clientX); });
+
+// 键盘
+let keyHoldDir = 0, keyHoldStart = 0, keyHoldBoost = 1;
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') keyHoldDir = 0;
+});
+window.addEventListener('blur', () => { keyHoldDir = 0; });
+window.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space'){ e.preventDefault(); playing = !playing; update(); }
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+    e.preventDefault();
+    const dir2 = (e.key === 'ArrowRight') ? 1 : -1;
+    if (keyHoldDir !== dir2){
+      keyHoldDir = dir2;
+      keyHoldStart = performance.now();
+      keyHoldBoost = e.shiftKey ? 3 : 1;
+      tween = null;
+      playing = false;
+    }
+  }
+  if (e.key === 'Home'){ tween = {target: START}; playing=false; }
+  if (e.key === 'End'){ tween = {target: END}; playing=false; }
+});
+
+// 窗口尺寸变化
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { layout(); }, 120);
+});
+
+// URL 参数（用于截图测试）：?year=1949&paused=1
+(function initParams(){
+  const q = new URLSearchParams(location.search);
+  if (q.has('year')) currentYear = clamp(parseFloat(q.get('year')), START, END);
+  if (q.get('paused') === '1') playing = false;
+  if (q.get('dwell') === '0') dwellEnabled = false;
+  if (q.get('snap') === '1') mapSnap = true;
+  if (q.get('persist') === '1'){ persistLabels = true; const pc = document.getElementById('persistChk'); if (pc) pc.checked = true; }
+  if (q.get('faction') === '0'){ factionMode = false; const fc = document.getElementById('factionChk'); if (fc) fc.checked = false; }
+  if (q.get('track') === 'mao' || q.get('track') === 'all'){
+    activeTrack = q.get('track');
+    document.querySelectorAll('#trackTabs button').forEach(x => x.classList.toggle('on', x.dataset.track === activeTrack));
+  }
+  if (q.get('hidetop') === '1'){
+    document.body.classList.add('topHidden');
+    const ts = document.getElementById('topShow');
+    if (ts) ts.classList.add('show');
+  }
+})();
+
+initMap();
+layout();
+(function applyZoomParam(){
+  const q = new URLSearchParams(location.search);
+  const z = parseFloat(q.get('zoom') || '0');
+  if (!(z > 1)) return;
+  const fv = fullView('china');
+  MAP.view.w = fv.w / z;
+  MAP.view.cx = fv.cx;
+  MAP.view.cy = fv.cy;
+  MAP.goal = {cx: fv.cx, cy: fv.cy, w: fv.w / z};
+  applyMapView();
+})();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
