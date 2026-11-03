@@ -9,7 +9,7 @@
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(1200px 600px at 50% 45%, #14202e 0%, var(--bg1) 70%);color:var(--text);
     font-family:"SimSun","宋体","NSimSun","新宋体","Microsoft YaHei","PingFang SC",system-ui,sans-serif}
-  #svg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:2}
+  #svg{touch-action:none;position:absolute;inset:0;width:100%;height:100%;display:block;z-index:2}
   #svg text{font-family:"SimSun","宋体","NSimSun","新宋体",sans-serif}
   /* ---------- 顶部 UI ---------- */
   #topLeft{position:fixed;left:186px;top:10px;right:100px;z-index:30;display:flex;flex-direction:column;gap:8px}
@@ -1442,6 +1442,8 @@ let dwellEnabled = true;
 let tween = null;
 let activeId = null;
 let dragging = false, dragStartX = 0, dragStartYear = 0, wasPlaying = false, moved = 0;
+let dragLastX = 0, dragLastT = 0, dragVX = 0, dragPointerType = 'mouse';
+let timelineInertia = null;
 let nodes = {};       // id -> {dot, ev, g}
 let TICKS = [];
 let ERABARS = [];
@@ -3482,7 +3484,7 @@ function update(){
   bigYear.textContent = Math.floor(currentYear + 0.001);
   const activeEv = activeId ? EVENTS.find(e => e.id === activeId) : null;
   if (activeTrack === 'mao' || (activeEv && (activeEv.track === 'mao'))){
-    eraName.textContent = '毛中特 · 会议 / 著作 / 理论成果 · 放大 ×' + (PPY/12).toFixed(1);
+    eraName.textContent = '毛中特 · 会议 / 著作 / 理论成果 · 放大 ×' + axisZoom.toFixed(1);
   } else {
     eraName.textContent = eraAt(currentYear).name + ' · 放大 ×' + axisZoom.toFixed(1);
   }
@@ -3585,7 +3587,16 @@ function tick(ts){
   if (!lastTs) lastTs = ts;
   const dt = Math.min(0.06, (ts - lastTs)/1000);
   lastTs = ts;
-  if (keyHoldDir){
+  if (timelineInertia){
+    const now = performance.now();
+    const idt = Math.min(40, now - timelineInertia.last);
+    timelineInertia.last = now;
+    currentYear = clamp(currentYear - timelineInertia.vx * idt / PPY, START, END);
+    timelineInertia.vx *= Math.pow(0.94, idt / 16);
+    if (Math.abs(timelineInertia.vx) < 0.01 || currentYear >= END || currentYear <= START){
+      timelineInertia = null;
+    }
+  } else if (keyHoldDir){
     const held = (performance.now() - keyHoldStart) / 1000;
     const speed = (2.2 + 9.5 * held) * keyHoldBoost;
     currentYear = clamp(currentYear + keyHoldDir * speed * dt, START, END);
@@ -3668,33 +3679,47 @@ svg.addEventListener('click', (e) => {
 // 拖动擦洗
 svg.addEventListener('pointerdown', (e) => {
   if (e.target.closest && e.target.closest('.ev')) return;
+  timelineInertia = null;
   dragging = true; dragStartX = e.clientX; dragStartYear = currentYear; moved = 0;
+  dragLastX = e.clientX; dragLastT = performance.now(); dragVX = 0;
+  dragPointerType = e.pointerType || 'mouse';
   wasPlaying = playing; playing = false;
   svg.setPointerCapture && svg.setPointerCapture(e.pointerId);
 });
 window.addEventListener('pointermove', (e) => {
   if (!dragging) return;
+  const now = performance.now();
+  const dt = Math.max(1, now - dragLastT);
+  const instVX = (e.clientX - dragLastX) / dt;
+  dragVX = dragVX * 0.65 + instVX * 0.35;
+  dragLastX = e.clientX; dragLastT = now;
   const dx = e.clientX - dragStartX;
   moved = Math.max(moved, Math.abs(dx));
   currentYear = clamp(dragStartYear - dx/PPY, START, END);
   update();
 });
-window.addEventListener('pointerup', () => {
+window.addEventListener('pointerup', (e) => {
   if (!dragging) return;
   dragging = false;
   if (moved > 6) MAP.forceFly = true;
+  if (dragPointerType !== 'mouse' && moved > 6 && Math.abs(dragVX) > 0.035){
+    timelineInertia = {vx: dragVX, last: performance.now()};
+  } else {
+    timelineInertia = null;
+  }
   if (wasPlaying) playing = true;
   update();
 });
 
 // 滚轮：坐标轴区域缩放时间轴；其他区域擦洗
 window.addEventListener('wheel', (e) => {
-  e.preventDefault();
+  e.preventDefault(); timelineInertia = null;
   const ax = (W > 1100 && e.clientX < 530) ? W/2 : e.clientX;
   zoomTimelineAt(ax, e.deltaY);
 }, {passive:false});
 
 function zoomTimelineAt(clientX, deltaY){
+  timelineInertia = null;
   const oldPPY = PPY;
   const factor = Math.exp(-deltaY * 0.0015);
   const nextZoom = clamp(axisZoom * factor, 0.45, 12);
@@ -3708,6 +3733,7 @@ function zoomTimelineAt(clientX, deltaY){
 
 // 进度条
 function trackSeek(clientX){
+  timelineInertia = null;
   const r = track.getBoundingClientRect();
   const p = clamp((clientX - r.left) / r.width, 0, 1);
   MAP.forceFly = true;
