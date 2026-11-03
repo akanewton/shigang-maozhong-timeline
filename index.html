@@ -1446,7 +1446,8 @@ let nodes = {};       // id -> {dot, ev, g}
 let TICKS = [];
 let ERABARS = [];
 let ERALABELS = [];
-let PPY = 14;
+let BASE_PPY = 22;
+let PPY = 22;
 let activeTrack = 'shi';
 let factionMode = true;
 let showFactionNames = false;
@@ -1454,6 +1455,7 @@ let persistLabels = false;
 let questEnabled = true;
 let questEventId = null;
 let axisZoom = 1;
+let touchTipPinned = false;
 function inTrack(ev, tr){ if (tr === 'all') return true; return (ev.tracks || [ev.track || 'shi']).includes(tr); }
 
 let labelEls = [];    // {ev, el}
@@ -2899,7 +2901,10 @@ mapChk.addEventListener('change', () => {
 const mapDrag = document.getElementById('mapDrag');
 let mapDragging = false, mapDragX = 0, mapDragY = 0, mapDragCx = 0, mapDragCy = 0;
 if (mapDrag){
+  let mapTapStart = null;
   mapDrag.addEventListener('pointerdown', (e) => {
+    mapTapStart = {x:e.clientX, y:e.clientY, t:Date.now(), type:e.pointerType};
+    touchTipPinned = false;
     if (e.button !== 0) return;
     mapDragging = true;
     mapDragX = e.clientX; mapDragY = e.clientY;
@@ -3009,8 +3014,20 @@ if (mapDrag){
     tip.style.top = (e.clientY + 14) + 'px';
   });
   mapDrag.addEventListener('pointerleave', () => {
+    if (touchTipPinned) return;
     const tip = document.getElementById('factionTip'); if (tip) tip.style.display = 'none';
     const link = document.getElementById('siteLink'); if (link) link.style.opacity = '0';
+  });
+  mapDrag.addEventListener('pointerup', (e) => {
+    if (!mapTapStart || e.pointerType === 'mouse') return;
+    const moved = Math.hypot(e.clientX - mapTapStart.x, e.clientY - mapTapStart.y);
+    const held = Date.now() - mapTapStart.t;
+    if (moved < 10 && held < 500){
+      touchTipPinned = true;
+      const evt = new PointerEvent('pointermove', {clientX:e.clientX, clientY:e.clientY, pointerType:e.pointerType, bubbles:true});
+      mapDrag.dispatchEvent(evt);
+    }
+    mapTapStart = null;
   });
   mapDrag.addEventListener('wheel', (e) => {
     e.preventDefault(); e.stopPropagation();
@@ -3299,9 +3316,8 @@ function baseTimelineTarget(y){
   return t;
 }
 function update(){
-  // 自动缩放：密集期把整个轴（刻度+节点一起）拉长；axisZoom 为用户滚轮缩放
-  const target = baseTimelineTarget(currentYear) * axisZoom;
-  PPY += (target - PPY) * (playing ? 0.06 : 0.22);
+  // 坐标轴只受手动缩放控制：手动设定后保持比例，不随年份自动变化
+  PPY = BASE_PPY * axisZoom;
   const viewStart = currentYear - W/(2*PPY);
   const viewEnd = currentYear + W/(2*PPY);
 
@@ -3468,7 +3484,7 @@ function update(){
   if (activeTrack === 'mao' || (activeEv && (activeEv.track === 'mao'))){
     eraName.textContent = '毛中特 · 会议 / 著作 / 理论成果 · 放大 ×' + (PPY/12).toFixed(1);
   } else {
-    eraName.textContent = eraAt(currentYear).name + ' · 放大 ×' + (PPY/12).toFixed(1);
+    eraName.textContent = eraAt(currentYear).name + ' · 放大 ×' + axisZoom.toFixed(1);
   }
   updateBubblesPosition();
   thumb.style.left = ((currentYear - START)/(END - START) * 100) + '%';
@@ -3681,11 +3697,11 @@ window.addEventListener('wheel', (e) => {
 function zoomTimelineAt(clientX, deltaY){
   const oldPPY = PPY;
   const factor = Math.exp(-deltaY * 0.0015);
-  const nextZoom = clamp(axisZoom * factor, 0.45, 3.6);
+  const nextZoom = clamp(axisZoom * factor, 0.45, 12);
   if (Math.abs(nextZoom - axisZoom) < 0.001) return;
   const yearAtCursor = currentYear + (clientX - W/2) / oldPPY;
   axisZoom = nextZoom;
-  PPY = baseTimelineTarget(currentYear) * axisZoom;
+  PPY = BASE_PPY * axisZoom;
   currentYear = clamp(yearAtCursor - (clientX - W/2) / PPY, START, END);
   update();
 }
