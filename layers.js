@@ -99,7 +99,7 @@ window.FACTION_PHASES = [
     {name:'国统区', color:'#4f8fd9', prov:['广东省','广西壮族自治区','四川省','重庆市','云南省','贵州省','新疆维吾尔自治区','青海省','海南省','台湾省']}, {name:'西藏地方', color:'#8b8f98', alpha:.8, prov:['西藏自治区']},
     {name:'英属香港', color:'#7d6bff', alpha:.75, prov:['香港特别行政区']}
   ]},
-  {from:1949, to:1950, label:'新中国成立 · 大陆基本解放', factions:[
+  {from:1949, to:1951, label:'新中国成立 · 大陆基本解放', factions:[
     {name:'解放区', color:'#e23b3b', prov:['北京市','天津市','河北省','山西省','内蒙古自治区','辽宁省','吉林省','黑龙江省','上海市','江苏省','浙江省','安徽省','福建省','江西省','山东省','河南省','湖北省','湖南省','广东省','广西壮族自治区','海南省','重庆市','四川省','贵州省','云南省','陕西省','甘肃省','青海省','宁夏回族自治区','新疆维吾尔自治区']},
     {name:'国统区', color:'#4f8fd9', prov:['台湾省']}, {name:'西藏地方', color:'#8b8f98', alpha:.8, prov:['西藏自治区']},
     {name:'英属香港', color:'#7d6bff', alpha:.75, prov:['香港特别行政区']}
@@ -149,16 +149,29 @@ window.FACTION_PHASES.forEach(p => {
     ]}
   ];
   const HKN = '香港特别行政区';
+  const MACAU = '澳门特别行政区';
   const newChina = [
-    {from:1950, to:1997, label:'中华人民共和国', factions:[
+    {from:1951, to:1997, label:'中华人民共和国', factions:[
       {name:'中华人民共和国', color:'#e0453e', alpha:.86, prov:ALL.filter(n => n !== HKN)},
       {name:'英属香港', color:'#7d6bff', alpha:.75, prov:[HKN]}
     ]},
-    {from:1997, to:2022, label:'中华人民共和国 · 香港回归', factions:[
+    {from:1997, to:1999, label:'中华人民共和国 · 香港回归', factions:[
+      {name:'中华人民共和国', color:'#e0453e', alpha:.86, prov:ALL.filter(n => n !== MACAU)},
+      {name:'葡属澳门', color:'#8b8f98', alpha:.8, prov:[MACAU]}
+    ]},
+    {from:1999, to:2022, label:'中华人民共和国 · 澳门回归', factions:[
       {name:'中华人民共和国', color:'#e0453e', alpha:.86, prov:ALL.slice()}
     ]}
   ];
   window.FACTION_PHASES = early.concat(window.FACTION_PHASES || [], newChina);
+
+  // 澳门：1887—1999 年单列，避免被并入中国政权
+  window.FACTION_PHASES.forEach(p => {
+    if (p.from >= 1887 && p.to <= 1999){
+      p.factions.forEach(f => { f.prov = (f.prov || []).filter(n => n !== MACAU); });
+      if (!p.factions.some(f => f.name === '葡属澳门')) p.factions.push({name:'葡属澳门', color:'#8b8f98', alpha:.8, prov:[MACAU]});
+    }
+  });
 })();
 
 
