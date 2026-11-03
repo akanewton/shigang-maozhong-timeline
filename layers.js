@@ -136,7 +136,7 @@ window.FACTION_PHASES.forEach(p => {
     ]},
     {from:1895, to:1912, label:'清朝 · 列强瓜分势力范围（示意）', factions:[
       {name:'清朝', color:'#a98455', alpha:.58, prov:without(['辽宁省','吉林省','黑龙江省','新疆维吾尔自治区','山东省','西藏自治区','广东省','香港特别行政区','云南省','广西壮族自治区','海南省','福建省','台湾省'])},
-      {name:'俄国势力范围', color:'#6b8fbf', alpha:.62, prov:['辽宁省','吉林省','黑龙江省','新疆维吾尔自治区','乌里雅苏台']},
+      {name:'俄国势力范围', color:'#6b8fbf', alpha:.62, prov:['辽宁省','吉林省','黑龙江省','新疆维吾尔自治区']},
       {name:'德国势力范围', color:'#c98a3a', alpha:.62, prov:['山东省']},
       {name:'英国势力范围', color:'#7d6bff', alpha:.62, prov:['西藏自治区','广东省','香港特别行政区']},
       {name:'法国势力范围', color:'#5fa88f', alpha:.62, prov:['云南省','广西壮族自治区','海南省']},
@@ -168,8 +168,9 @@ window.FACTION_PHASES.forEach(p => {
   // 澳门：1887—1999 年单列，避免被并入中国政权
   window.FACTION_PHASES.forEach(p => {
     if (p.from >= 1887 && p.to <= 1999){
-      p.factions.forEach(f => { f.prov = (f.prov || []).filter(n => n !== MACAU); });
-      if (!p.factions.some(f => f.name === '葡属澳门')) p.factions.push({name:'葡属澳门', color:'#8b8f98', alpha:.8, prov:[MACAU]});
+      p.factions.forEach(f => { if (f.name !== '葡属澳门') f.prov = (f.prov || []).filter(n => n !== MACAU); });
+      const mac = p.factions.find(f => f.name === '葡属澳门');
+      if (mac) mac.prov = [MACAU]; else p.factions.push({name:'葡属澳门', color:'#8b8f98', alpha:.8, prov:[MACAU]});
     }
   });
 })();
@@ -196,13 +197,13 @@ window.EXTRA_ROUTES = [
    points:[[113.26,23.13],[113.6,24.8],[112.98,28.2],[114.30,30.60],[115.89,28.68],[118.78,32.06],[121.47,31.23]]},
   {name:'秋收起义 · 上井冈山', from:1927, to:1928, color:'#ff8f6b',
    points:[[112.98,28.2],[113.8,28.0],[114.0,27.2],[114.17,26.57]]},
-  {name:'辽沈战役', from:1948, to:1949, color:'#e23b3b',
+  {name:'辽沈战役', from:1948.7, to:1948.9, color:'#e23b3b',
    points:[[121.13,41.10],[123.43,41.80]]},
-  {name:'淮海战役', from:1948.5, to:1949, color:'#e23b3b',
+  {name:'淮海战役', from:1948.85, to:1949.1, color:'#e23b3b',
    points:[[117.28,34.26],[117.6,33.7],[116.8,33.8]]},
-  {name:'平津战役', from:1948.8, to:1949, color:'#e23b3b',
+  {name:'平津战役', from:1948.9, to:1949.1, color:'#e23b3b',
    points:[[116.40,39.90],[117.20,39.10]]},
-  {name:'渡江战役 1949', from:1949, to:1950, color:'#e23b3b',
+  {name:'渡江战役 1949', from:1949.3, to:1949.5, color:'#e23b3b',
    points:[[118.78,32.06],[120.0,31.9],[121.47,31.23]]}
 ];
 
@@ -226,3 +227,32 @@ window.KEY_SITES.push(
   {name:'三大战役', lon:117.28, lat:34.26, from:1948.5, to:1949.3, detail:'辽沈（锦州—沈阳） · 淮海（徐州—陈官庄） · 平津（北平—天津）'},
   {name:'太平天国', lon:118.78, lat:32.06, from:1851, to:1864, detail:'1851—1864 · 天京（南京）与清廷对峙'}
 );
+
+
+/* ===== v7.18：台湾/香港阶段补丁 ===== */
+(function(){
+  const TWN='台湾省', HKN='香港特别行政区';
+  const phases=window.FACTION_PHASES;
+  const strip=(p,names)=>{ p.factions.forEach(f=>{ if(!names.includes(f.name)) f.prov=(f.prov||[]).filter(n=>n!==TWN&&n!==HKN); }); };
+  phases.forEach(p=>{
+    if (p.from >= 1916 && p.to <= 1937){
+      strip(p,['日占台湾','英属香港']);
+      if (!p.factions.some(f=>f.name==='日占台湾')) p.factions.push({name:'日占台湾', color:'#a85a32', alpha:.72, prov:[TWN]});
+      if (!p.factions.some(f=>f.name==='英属香港')) p.factions.push({name:'英属香港', color:'#7d6bff', alpha:.75, prov:[HKN]});
+    }
+  });
+  const idx=phases.findIndex(p=>p.from===1937 && p.to===1945);
+  if (idx>=0){
+    const p=phases[idx];
+    p.to=1941; p.label='抗日战争 · 三方格局（1937—1941）';
+    strip(p,['日占台湾','英属香港','日占香港']);
+    if (!p.factions.some(f=>f.name==='日占台湾')) p.factions.push({name:'日占台湾', color:'#a85a32', alpha:.72, prov:[TWN]});
+    if (!p.factions.some(f=>f.name==='英属香港')) p.factions.push({name:'英属香港', color:'#7d6bff', alpha:.75, prov:[HKN]});
+    const p2=JSON.parse(JSON.stringify(p));
+    p2.from=1941; p2.to=1945; p2.label='抗日战争 · 日占香港（1941—1945）';
+    p2.factions=p2.factions.filter(f=>f.name!=='英属香港');
+    if (!p2.factions.some(f=>f.name==='日占香港')) p2.factions.push({name:'日占香港', color:'#a85a32', alpha:.78, prov:[HKN]});
+    phases.splice(idx+1,0,p2);
+  }
+  phases.forEach(p=>{ const mac=p.factions.find(f=>f.name==='葡属澳门'); if(mac) mac.prov=['澳门特别行政区']; });
+})();

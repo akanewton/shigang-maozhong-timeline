@@ -728,7 +728,7 @@ const EVENTS = [
   {"id":"e1937","year":1937,"era":"mid","title":"七七事变","sign":"全面抗战开始，中华民族空前团结。","links":["e1936"]},
   {"id":"e1938","year":1938,"era":"mid","title":"《论持久战》发表","sign":"科学预判抗战三个阶段，指明抗战方向。","links":["e1937"]},
   {"id":"e1942yz","year":1942,"era":"mid","title":"延安整风","sign":"反对主观主义、宗派主义、党八股，确立实事求是思想路线，为七大作思想准备。","links":["e1938"]},
-  {"id":"e1945b","year":1945,"era":"mid","title":"中共七大","sign":"毛泽东思想确立为党的指导思想，为抗战胜利后指明方向。","links":["e1945a"]},
+  {"id":"e1945b","year":1945,"era":"mid","title":"中共七大","sign":"毛泽东思想确立为党的指导思想，为抗战胜利后指明方向。","links":["e1942yz"]},
   {"id":"e1945a","year":1945,"era":"mid","title":"抗战胜利","sign":"近代以来中国反抗外敌入侵第一次取得完全胜利。","links":["e1938"]},
   {"id":"e1946","year":1946,"era":"mid","title":"解放战争","sign":"推翻国民党统治，为新中国成立奠定基础。","links":["e1945b"]},
   {"id":"e1948","year":1948,"era":"mid","title":"三大战役","sign":"战略决战，基本消灭国民党主力。","links":["e1946"]},
@@ -737,20 +737,21 @@ const EVENTS = [
   {"id":"e1950","year":1950,"era":"d1","title":"抗美援朝","sign":"1950年10月25日，中国人民志愿军入朝作战，抗美援朝战争开始。","links":["e1949"]},
   {"id":"e1953","year":1953,"era":"d1","title":"一五计划与三大改造","sign":"社会主义工业化起步，开始向社会主义过渡。","links":["e1949"]},
   {"id":"e1954","year":1954,"era":"d1","title":"一届人大与宪法","sign":"人民代表大会制度确立，社会主义民主法制建设起步。","links":["e1953"]},
-  {"id":"e1956b","year":1956,"era":"d1","title":"中共八大","sign":"正确分析国内主要矛盾，提出集中力量发展生产力。","links":["e1956a"]},
+  {"id":"e1956b","year":1956,"era":"d1","title":"中共八大","sign":"正确分析国内主要矛盾，提出集中力量发展生产力。","links":["e1953"]},
   {"id":"e1956a","year":1956,"era":"d1","title":"三大改造完成","sign":"社会主义制度基本建立，中国进入社会主义初级阶段。","links":["e1953"]},
-  {"id":"e1964","year":1964,"era":"d1","title":"两弹一星","sign":"科技国防重大突破，提升国际地位。","links":["e1956b"]},
+  {"id":"e1964","year":1964,"era":"d1","title":"第一颗原子弹爆炸成功","sign":"1964年10月16日第一颗原子弹爆炸成功；后来氢弹、人造卫星相继突破，合称“两弹一星”。","links":["e1956b"]},
   {"id":"e1978","year":1978,"era":"d1","title":"十一届三中全会","sign":"伟大转折：确立解放思想、实事求是，改革开放的开端。","links":["e1956b"]},
   {"id":"e1980","year":1980,"era":"d2","title":"经济特区","sign":"对外开放的窗口，“杀出一条血路”。","links":["e1978"]},
-  {"id":"e1992","year":1992,"era":"d2","title":"南方谈话与十四大","sign":"确立社会主义市场经济体制改革目标，改革开放进入新阶段。","links":["e1980"]},
-  {"id":"e1997","year":1997,"era":"d2","title":"香港回归与十五大","sign":"“一国两制”成功实践；邓小平理论写入党章。","links":["e1992"]},
+  {"id":"e1992","year":1992,"era":"d2","title":"南方谈话","sign":"邓小平南方谈话，强调计划和市场都是手段，推动改革开放再出发。","links":["e1980"]},
+  {"id":"e1992b","year":1992,"era":"d2","title":"中共十四大","sign":"确立社会主义市场经济体制改革目标，用邓小平建设有中国特色社会主义理论武装全党。","links":["e1992"]},
+  {"id":"e1997","year":1997,"era":"d2","title":"香港回归","sign":"中国恢复对香港行使主权，“一国两制”成功实践。","links":["e1992b"]},
   {"id":"e2001","year":2001,"era":"d2","title":"加入WTO","sign":"深度融入世界经济，对外开放进入新阶段。","links":["e1997"]},
   {"id":"e2003","year":2003,"era":"d2","title":"科学发展观","sign":"以人为本、全面协调可持续发展。","links":["e2001"]},
   {"id":"e2012","year":2012,"era":"d2","title":"十八大","sign":"中国特色社会主义进入新时代。","links":["e2003"]},
   {"id":"e2013sj","year":2013,"era":"new","tracks":["shi","mao"],"title":"十八届三中全会","sign":"全面深化改革总目标：完善和发展中国特色社会主义制度、推进国家治理体系和治理能力现代化。","links":["e2012"]},
   {"id":"e2014sj","year":2014,"era":"new","tracks":["shi","mao"],"title":"十八届四中全会","sign":"全面依法治国总目标：建设中国特色社会主义法治体系、建设社会主义法治国家。","links":["e2013sj"]},
   {"id":"e2015sj","year":2015,"era":"new","tracks":["shi","mao"],"title":"十八届五中全会","sign":"正式提出创新、协调、绿色、开放、共享的新发展理念。","links":["e2014sj"]},
-  {"id":"e2016sj","year":2016,"era":"new","tracks":["shi","mao"],"title":"十八届六中全会","sign":"正式确立习近平同志党中央的核心、全党的核心地位。","links":["e2015sj"]},
+  {"id":"e2016sj","year":2016,"era":"new","tracks":["shi","mao"],"title":"十八届六中全会","sign":"正式确立习近平同志党中央的核心、全党的核心地位；通过党内政治生活准则和监督条例。","links":["e2015sj"]},
   {"id":"e2017","year":2017,"era":"new","title":"十九大","sign":"确立习近平新时代中国特色社会主义思想为党的指导思想。","links":["e2012"]},
   {"id":"e2018","year":2018,"era":"new","tracks":["shi","mao"],"title":"2018年修宪","sign":"十三届全国人大一次会议通过宪法修正案，将习近平新时代中国特色社会主义思想载入宪法。","links":["e2017"]},
   {"id":"e2021","year":2021,"era":"new","title":"建党百年 · 全面小康","sign":"第一个百年奋斗目标实现，历史性解决绝对贫困。","links":["e2017"]},
@@ -855,7 +856,7 @@ const EVENT_DATE = {
   ],
   "e1900": [
     6,
-    0
+    15
   ],
   "e1901": [
     9,
@@ -981,10 +982,6 @@ const EVENT_DATE = {
     9,
     15
   ],
-  "e1956a": [
-    12,
-    1
-  ],
   "e1956b": [
     9,
     15
@@ -1004,6 +1001,10 @@ const EVENT_DATE = {
   "e1992": [
     1,
     18
+  ],
+  "e1992b": [
+    10,
+    12
   ],
   "e1997": [
     7,
@@ -1087,7 +1088,7 @@ const EVENT_DATE = {
   ],
   "m1930b": [
     5,
-    0
+    15
   ],
   "m1935c": [
     12,
@@ -1095,11 +1096,11 @@ const EVENT_DATE = {
   ],
   "m1937a": [
     7,
-    0
+    15
   ],
   "m1937b": [
     8,
-    0
+    15
   ],
   "m1937c": [
     8,
@@ -1172,7 +1173,7 @@ const MAO_EVENTS = [
   {"id":"m1923","year":1923,"era":"mao","shiEra":"mid","tracks":["shi","mao"],"title":"中共三大","sign":"决定共产党员以个人身份加入国民党，推动第一次国共合作。","links":["e1922"]},
   {"id":"m1925a","year":1925,"era":"mao","track":"mao","title":"中共四大","sign":"提出无产阶级在民主革命中的领导权和工农联盟问题。","links":["m1923"]},
   {"id":"m1925b","year":1925,"era":"mao","track":"mao","title":"《中国社会各阶级的分析》","sign":"分清敌友是革命的首要问题；无产阶级是领导力量。","links":["m1925a"]},
-  {"id":"m1927b","year":1927,"era":"mao","track":"mao","title":"《湖南农民运动考察报告》","sign":"充分肯定农民运动，强调农民问题是中国革命的中心问题。","links":["m1927a"]},
+  {"id":"m1927b","year":1927,"era":"mao","track":"mao","title":"《湖南农民运动考察报告》","sign":"充分肯定农民运动，强调农民问题是中国革命的中心问题。","links":["e1926"]},
   {"id":"m1927a","year":1927,"era":"mao","track":"mao","title":"中共五大","sign":"批评陈独秀右倾错误，但未能提出挽救革命的正确方针。","links":["e1926"]},
   {"id":"m1928","year":1928,"era":"mao","track":"mao","title":"中共六大","sign":"唯一一次在国外召开的党代会，分析革命低潮形势。","links":["e1927c"]},
   {"id":"m1930a","year":1930,"era":"mao","track":"mao","title":"《星星之火，可以燎原》","sign":"提出“农村包围城市、武装夺取政权”道路，反对悲观思想。","links":["e1929"]},
@@ -1205,7 +1206,7 @@ const LOC = {
   e1842:{lon:118.78,lat:32.06,place:'南京'},
   e1851:{lon:110.0,lat:23.4,place:'金田'},
   e1856:{lon:113.26,lat:23.13,place:'广州'},
-  e1861:{lon:121.47,lat:31.23,place:'上海'},
+  e1861:{lon:116.4,lat:39.9,place:'北京'},
   e1860bj:{lon:116.4,lat:39.9,place:'北京'},
   e1864tj:{lon:118.78,lat:32.06,place:'南京'},
   e1864nw:{lon:82.98,lat:46.75,place:'塔城'},
@@ -1218,10 +1219,10 @@ const LOC = {
   e1890hy:{lon:114.30,lat:30.60,place:'武汉'},
   e1876yt:{lon:121.39,lat:37.54,place:'烟台'},
   e1881yl:{lon:81.32,lat:43.92,place:'伊犁'},
-  e1883zf:{lon:106.72,lat:22.10,place:'镇南关'},
+  e1883zf:{lon:105.5,lat:21.1,place:'越南山西'},
   e1885tw:{lon:121.56,lat:25.04,place:'台北'},
   e1888bh:{lon:122.12,lat:37.51,place:'威海'},
-  e1894:{lon:122.12,lat:37.51,place:'威海'},
+  e1894:{lon:126.0,lat:37.0,place:'丰岛海域'},
   e1895:{lon:130.95,lat:33.95,place:'马关',world:true},
   e1898:{lon:116.4,lat:39.9,place:'北京'},
   e1900:{lon:116.4,lat:39.9,place:'北京'},
@@ -1229,7 +1230,7 @@ const LOC = {
   e1905:{lon:139.7,lat:35.7,place:'东京',world:true},
   e1911:{lon:114.3,lat:30.6,place:'武昌'},
   e1912:{lon:118.78,lat:32.06,place:'南京'},
-  e1915:{lon:116.4,lat:39.9,place:'北京'},
+  e1915:{lon:121.47,lat:31.23,place:'上海'},
   e1919:{lon:116.4,lat:39.9,place:'北京'},
   e1921:{lon:121.47,lat:31.23,place:'上海'},
   e1922:{lon:121.47,lat:31.23,place:'上海'},
@@ -1247,10 +1248,10 @@ const LOC = {
   e1936:{lon:108.94,lat:34.34,place:'西安'},
   e1937:{lon:116.2,lat:39.85,place:'卢沟桥'},
   e1938:{lon:109.49,lat:36.59,place:'延安'},
-  e1945a:{lon:118.78,lat:32.06,place:'南京'},
+  e1945a:{lon:116.4,lat:39.9,place:'全国'},
   e1945b:{lon:109.49,lat:36.59,place:'延安'},
   e1946:{lon:114.4,lat:31.8,place:'宣化店'},
-  e1948:{lon:117.28,lat:34.26,place:'徐州'},
+  e1948:{lon:117.28,lat:34.26,place:'锦州/徐州/北平'},
   e1949:{lon:116.4,lat:39.9,place:'北京'},
   e1953:{lon:116.4,lat:39.9,place:'北京'},
   e1954:{lon:116.4,lat:39.9,place:'北京'},
@@ -1261,6 +1262,7 @@ const LOC = {
   e1980:{lon:114.06,lat:22.55,place:'深圳'},
   e1992:{lon:114.06,lat:22.55,place:'深圳'},
   e1997:{lon:114.17,lat:22.32,place:'香港'},
+  e1992b:{lon:116.4,lat:39.9,place:'北京'},
   e2001:{lon:6.14,lat:46.2,place:'日内瓦',world:true},
   e2003:{lon:116.4,lat:39.9,place:'北京'},
   e2012:{lon:116.4,lat:39.9,place:'北京'},
@@ -1610,6 +1612,18 @@ function initMap(){
   });
   MAP.groups.chinaAll.appendChild(MAP.groups.qingProvinces);
   MAP.groups.chinaAll.appendChild(MAP.groups.taiping);
+
+  // 上海在太平天国时期并未被太平军长期控制；用小刀会/清军争夺的清代色覆盖过于粗略的紫色叠加
+  (function(){
+    const sh = (window.CHINA_MAP || []).find(f => f.n === '上海市');
+    if (!sh) return;
+    MAP.taipingShanghai = svgEl('path', {
+      d: featPath(sh, cproj), fill:'#a98455', stroke:'#e2cfa7',
+      'stroke-width':1, 'stroke-linejoin':'round', 'vector-effect':'non-scaling-stroke', opacity:'0'
+    });
+    MAP.groups.chinaAll.appendChild(MAP.taipingShanghai);
+  })();
+
 
   // 领土得失高亮（收回=绿，失去=红）
   MAP.groups.highlights = svgEl('g', {id:'mapHighlights'});
@@ -2392,6 +2406,7 @@ function updateQingPhase(now){
     MAP.taipingPath.setAttribute('d', phasePath(tpPhase.taiping));
     MAP.groups.taiping.style.display = '';
     MAP.taipingPath.style.opacity = '.9';
+    if (MAP.taipingShanghai) MAP.taipingShanghai.style.opacity = '1';
     if (tpNote){
       const p = mapPointToScreen(118.8, 32.06);
       tpNote.style.left = p[0] + 'px';
@@ -2407,6 +2422,7 @@ function updateQingPhase(now){
     }
   } else {
     MAP.groups.taiping.style.display = 'none';
+    if (MAP.taipingShanghai) MAP.taipingShanghai.style.opacity = '0';
     if (tpNote){ tpNote.classList.remove('show'); delete tpNote.dataset.flashed; }
   }
   // 1895—1945 台湾被割让：隐藏台湾；1945 后恢复
@@ -2464,6 +2480,7 @@ function pointInRing(lon, lat, ring){
   return inside;
 }
 function occupationForProvince(name){
+  if (/台湾/.test(name) && currentYear >= 1949) return {name:'台湾地区（中国领土，1949年后由台湾当局实际控制）', color:'#4f8fd9'};
   if (!name) return null;
   if (/台湾/.test(name) && currentYear >= 1895 && currentYear < 1945) return {name:'日占台湾', color:'#a85a32'};
   if (/香港/.test(name) && currentYear < 1997) return {name:'英占香港', color:'#7d6bff'};
