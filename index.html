@@ -2561,6 +2561,21 @@ function periodContradiction(ev){
   if (y < 2012) return '人民日益增长的物质文化需要同落后的社会生产之间的矛盾。';
   return '人民日益增长的美好生活需要和不平衡不充分的发展之间的矛盾。';
 }
+const PERIOD_MAIN_TEXTS = new Set([
+  '认识世界资本主义扩张与清朝闭关自守的冲突，理解近代中国落后挨打的历史根源。',
+  '反抗外来侵略、争取民族独立，探索救亡图存道路。',
+  '地主阶级自救与早期改良探索，争取国家富强。',
+  '资产阶级维新与革命探索救国道路。',
+  '维护共和、反对专制，探索新的救国道路。',
+  '反帝反封建，推动国民革命和工农运动。',
+  '探索农村包围城市道路，开展土地革命和抗日救亡。',
+  '全民族抗战，争取抗战胜利。',
+  '推翻国民党统治，建立新中国。',
+  '巩固政权、恢复经济，完成社会主义改造。',
+  '探索社会主义建设道路，正确处理人民内部矛盾。',
+  '建设中国特色社会主义，推进改革开放和现代化。',
+  '实现中华民族伟大复兴，推进中国式现代化。'
+]);
 function buildHistoryTasks(ev){
   const custom = (window.HISTORY_TASKS || {})[ev.id] || {};
   const task = custom.main || defaultMainTask(ev);
@@ -2572,6 +2587,7 @@ function buildHistoryTasks(ev){
   sides = sides.filter(x => { if (!x || seen.has(x)) return false; seen.add(x); return true; });
   return {
     periodFallback: !custom.background || !custom.contradiction || !custom.sides,
+    mainFromPeriod: PERIOD_MAIN_TEXTS.has(custom.main || ''),
     background: custom.background || periodBackground(ev),
     contradiction: custom.contradiction || periodContradiction(ev),
     task,
@@ -2589,7 +2605,7 @@ function renderQuest(){
   document.getElementById('qpChapter').innerHTML = '考点：' + esc(questChapterKey(ev)) + (tasks.periodFallback ? ' <span class="qpPeriodNote">（按时期概括）</span>' : '');
   document.getElementById('qpBackground').innerHTML = rich(tasks.background);
   document.getElementById('qpContradiction').innerHTML = rich(tasks.contradiction);
-  document.getElementById('qpTask').innerHTML = rich(tasks.task);
+  document.getElementById('qpTask').innerHTML = rich(tasks.task) + (tasks.mainFromPeriod ? ' <span class="qpPeriodNote">（按时期概括）</span>' : '');
   document.getElementById('qpBody').innerHTML = '<ul class="qpSideList">' +
     tasks.sides.map(x => '<li>' + rich(x) + '</li>').join('') + '</ul>';
   document.getElementById('questPanel').classList.remove('hidden');
