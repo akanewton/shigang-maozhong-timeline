@@ -342,6 +342,9 @@
     #detailBubble { left:20px !important; right:20px !important; bottom:14px !important; }
   }
   @media (max-width:1100px){ #mobileQuestBtn{display:block !important;} }
+  #tlZoomCtl{display:none;position:fixed;left:12px;bottom:58px;z-index:36;gap:6px}
+  #tlZoomCtl button{width:36px;height:36px;border-radius:50%;border:1px solid #4f7fa8;background:#1c3550;color:#e8f2ff;font-size:18px;line-height:1;box-shadow:0 8px 22px rgba(0,0,0,.5)}
+  @media (max-width:1100px){ #tlZoomCtl{display:flex !important;} }
   #mobileQuestBtn{display:none;position:fixed;left:12px;bottom:14px;z-index:36;
     background:#1c3550;color:#e8f2ff;border:1px solid #4f7fa8;border-radius:999px;
     padding:8px 15px;font-size:13px;box-shadow:0 8px 22px rgba(0,0,0,.5);cursor:pointer}
@@ -612,6 +615,7 @@
   <circle id="eventDot" r="4"></circle>
 </svg>
 <button id="topShow">☰ 菜单</button>
+<div id="tlZoomCtl"><button id="tlZoomOut" title="缩小时间轴">−</button><button id="tlZoomIn" title="放大时间轴">＋</button></div>
 <button id="mobileQuestBtn">考点</button>
 <a id="standardMap" href="https://bzdt.ch.mnr.gov.cn/" target="_blank" rel="noopener" title="自然资源部标准地图服务">
   <span>本项目中所有地图仅供学习使用<br>实际地图请以自然资源部官方地图为准</span>
@@ -3795,6 +3799,17 @@ window.addEventListener('resize', () => {
     if (ts) ts.classList.add('show');
   }
 })();
+
+function setTimelineZoom(z){
+  timelineInertia = null;
+  axisZoom = clamp(z, 0.45, 12);
+  PPY = BASE_PPY * axisZoom;
+  update();
+}
+const tlZoomIn = document.getElementById('tlZoomIn');
+const tlZoomOut = document.getElementById('tlZoomOut');
+if (tlZoomIn) tlZoomIn.addEventListener('click', () => setTimelineZoom(axisZoom * 1.35));
+if (tlZoomOut) tlZoomOut.addEventListener('click', () => setTimelineZoom(axisZoom / 1.35));
 
 const mobileQuestBtn = document.getElementById('mobileQuestBtn');
 if (mobileQuestBtn){
