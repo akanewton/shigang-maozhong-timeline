@@ -870,7 +870,7 @@ const EVENT_DATE = {
   ],
   "e1900": [
     6,
-    15
+    null
   ],
   "e1901": [
     9,
@@ -995,6 +995,10 @@ const EVENT_DATE = {
   "e1954": [
     9,
     15
+  ],
+  "e1956a": [
+    12,
+    31
   ],
   "e1956b": [
     9,
@@ -1178,6 +1182,7 @@ const EVENT_DATE = {
   ]
 };
 function eventWhen(ev){
+  if (ev && ev.id === 'e1956a') return '1956年底';
   const d = EVENT_DATE[ev.id];
   if (!d) return ev.when || String(ev.year);
   return ev.year + '年' + d[0] + '月' + (d[1] ? d[1] + '日' : '');
@@ -3200,6 +3205,7 @@ function buildProgress(){
 /* ===================== 更新 ===================== */
 function eventAt(ev){
   if (!ev) return null;
+  if (ev.id === 'e1945a') return null; // 全国性事件，不画单点端点
   if (ev.loc && isFinite(ev.loc.lon) && isFinite(ev.loc.lat)) return [ev.loc.lon, ev.loc.lat];
   const t = ev.title || '';
   const rules = [

@@ -256,3 +256,17 @@ window.KEY_SITES.push(
   }
   phases.forEach(p=>{ const mac=p.factions.find(f=>f.name==='葡属澳门'); if(mac) mac.prov=['澳门特别行政区']; });
 })();
+
+
+/* 1951 年后台湾地区单列，颜色表示实际控制差异；台湾是中国领土不可分割的一部分 */
+(function(){
+  const TWN='台湾省';
+  window.FACTION_PHASES.forEach(p => {
+    if (p.from >= 1951){
+      p.factions.forEach(f => { f.prov = (f.prov || []).filter(n => n !== TWN); });
+      if (!p.factions.some(f => f.name === '台湾地区')){
+        p.factions.push({name:'台湾地区', color:'#6f8fb5', alpha:.85, prov:[TWN]});
+      }
+    }
+  });
+})();
