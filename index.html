@@ -329,9 +329,22 @@
   #detailBubble .dKpList li { margin-bottom:6px !important; }
 
   @media (max-width:1100px) {
-    #questPanel { display:none !important; }
+    #mobileQuestBtn { display:block; }
+    #questPanel {
+      display:flex !important; left:8px !important; right:8px !important;
+      top:auto !important; bottom:8px !important; width:auto !important;
+      height:52vh !important; max-height:52vh !important; padding:10px 12px;
+      border-radius:12px !important; transform:translateY(110%); opacity:0; pointer-events:none;
+      transition:transform .25s ease, opacity .25s ease; z-index:35;
+    }
+    #questPanel.mobileShow { transform:none; opacity:1; pointer-events:auto; }
+    #questPanel.hidden { display:none !important; }
     #detailBubble { left:20px !important; right:20px !important; bottom:14px !important; }
   }
+  @media (max-width:1100px){ #mobileQuestBtn{display:block !important;} }
+  #mobileQuestBtn{display:none;position:fixed;left:12px;bottom:14px;z-index:36;
+    background:#1c3550;color:#e8f2ff;border:1px solid #4f7fa8;border-radius:999px;
+    padding:8px 15px;font-size:13px;box-shadow:0 8px 22px rgba(0,0,0,.5);cursor:pointer}
 
 
   #detailBubble .dFacts { margin-top:10px; padding-top:9px; border-top:1px dashed #2f4459; }
@@ -599,6 +612,7 @@
   <circle id="eventDot" r="4"></circle>
 </svg>
 <button id="topShow">☰ 菜单</button>
+<button id="mobileQuestBtn">考点</button>
 <a id="standardMap" href="https://bzdt.ch.mnr.gov.cn/" target="_blank" rel="noopener" title="自然资源部标准地图服务">
   <span>本项目中所有地图仅供学习使用<br>实际地图请以自然资源部官方地图为准</span>
 </a>
@@ -3733,6 +3747,17 @@ window.addEventListener('resize', () => {
     if (ts) ts.classList.add('show');
   }
 })();
+
+const mobileQuestBtn = document.getElementById('mobileQuestBtn');
+if (mobileQuestBtn){
+  mobileQuestBtn.addEventListener('click', () => {
+    const p = document.getElementById('questPanel');
+    if (!p) return;
+    p.classList.remove('hidden');
+    p.classList.toggle('mobileShow');
+    mobileQuestBtn.textContent = p.classList.contains('mobileShow') ? '收起考点' : '考点';
+  });
+}
 
 initMap();
 layout();
