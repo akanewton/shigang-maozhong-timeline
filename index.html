@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>史纲 · 毛中特 时间轴（v7.33 公开版）</title>
+<title>史纲 · 毛中特 时间轴（v7.34 公开版）</title>
 <style>
   :root{ --bg1:#0a0e13; --bg2:#101823; --text:#e9f0f8; --muted:#8fa2b6; --line:#22303f; --accent:#7cc4ff; }
   *{box-sizing:border-box}
@@ -726,12 +726,55 @@
   .hl2{color:#8fe6ff;font-weight:700;background:linear-gradient(transparent 60%,rgba(105,200,255,.16) 60%);padding:0 1px}
   .hl3{color:#ff9d9d;font-weight:700;background:linear-gradient(transparent 60%,rgba(255,120,120,.14) 60%);padding:0 1px}
 </style>
+<style id="keypoint-list-style-v2">
+  /* 关键考点：去掉胶囊和卡片，只保留分条列点 + 标题/正文分色 */
+  #questPanel .kpLegend{display:none !important}
+  #questPanel .qpBody{padding:0 2px 4px}
+  #questPanel .qpSideList{list-style:none !important;padding-left:0 !important;margin:3px 0 0 !important;display:block !important}
+  #questPanel .qpSideList li.kp{
+    position:relative !important;display:block !important;
+    margin:2px 0 !important;padding:3px 0 3px 14px !important;
+    border:0 !important;border-left:0 !important;border-radius:0 !important;
+    background:none !important;box-shadow:none !important;
+    line-height:1.72 !important;font-size:13.3px !important;
+  }
+  #questPanel .qpSideList li.kp::before{
+    content:"" !important;position:absolute !important;left:1px !important;top:.72em !important;
+    width:5px !important;height:5px !important;border-radius:50% !important;background:#8aa5bd !important;
+  }
+  #questPanel .kpTag{display:none !important}
+  #questPanel .kpTitle{
+    display:inline !important;margin-right:6px !important;
+    font-family:"Microsoft YaHei",sans-serif !important;font-size:11px !important;
+    font-weight:700 !important;letter-spacing:.8px !important;white-space:nowrap !important;
+  }
+  #questPanel .kpText{display:inline !important}
+  #questPanel .kp.cause::before{background:#69b7ff !important}
+  #questPanel .kp.cause .kpTitle{color:#7cc4ff !important}
+  #questPanel .kp.cause .kpText{color:#cfe7ff !important}
+  #questPanel .kp.policy::before{background:#56e0c2 !important}
+  #questPanel .kp.policy .kpTitle{color:#6be8cf !important}
+  #questPanel .kp.policy .kpText{color:#d0fff7 !important}
+  #questPanel .kp.result::before{background:#8bdc91 !important}
+  #questPanel .kp.result .kpTitle{color:#9ce6a1 !important}
+  #questPanel .kp.result .kpText{color:#ddffdf !important}
+  #questPanel .kp.meaning::before{background:#ffd166 !important}
+  #questPanel .kp.meaning .kpTitle{color:#ffd76a !important}
+  #questPanel .kp.meaning .kpText{color:#ffe8bf !important}
+  #questPanel .kp.error::before{background:#ff8585 !important}
+  #questPanel .kp.error .kpTitle{color:#ff9a9a !important}
+  #questPanel .kp.error .kpText{color:#ffdada !important}
+  #questPanel .kp.meta::before{background:#c4a7ff !important}
+  #questPanel .kp.meta .kpTitle{color:#d3bdff !important}
+  #questPanel .kp.meta .kpText{color:#e6dcff !important}
+  #questPanel .kpDate{color:#8fe6ff !important;font-weight:700 !important}
+</style>
 </head>
 <body>
 <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <div id="topLeft">
-  <div id="title">史纲 · 毛中特 时间轴 <small>v7.33 公开版</small></div>
+  <div id="title">史纲 · 毛中特 时间轴 <small>v7.34 公开版</small></div>
   <button id="topToggle">隐藏边栏</button>
   <div id="controls">
     <button id="playBtn" class="pri">▶ 播放</button>
@@ -3181,7 +3224,7 @@ function keyPointHTML(x){
   let label = '', body = s, cls = 'neutral';
   if (m){ label = m[1]; body = s.slice(m[0].length); cls = tagMap[label] || 'neutral'; }
   let text = rich(body).replace(/(\d{4})\s*年/g, '<span class="kpDate">$1年</span>');
-  return '<li class="kp ' + cls + '">' + (label ? '<span class="kpTag">' + label + '</span>' : '') + '<span class="kpText">' + text + '</span></li>';
+  return '<li class="kp ' + cls + '">' + (label ? '<span class="kpTitle">' + label + '</span>' : '') + '<span class="kpText">' + text + '</span></li>';
 }
 function renderQuest(){
   const panel = document.getElementById('questPanel');
@@ -3195,8 +3238,7 @@ function renderQuest(){
   document.getElementById('qpBackground').innerHTML = rich(tasks.background);
   document.getElementById('qpContradiction').innerHTML = rich(tasks.contradiction);
   document.getElementById('qpTask').innerHTML = rich(tasks.task) + (tasks.mainFromPeriod ? ' <span class="qpPeriodNote">（按时期概括）</span>' : '');
-  const kpLegend = '<div class="kpLegend"><span class="cause">背景</span><span class="policy">方针</span><span class="result">结果</span><span class="meaning">意义</span><span class="error">易错</span></div>';
-  document.getElementById('qpBody').innerHTML = kpLegend + '<ul class="qpSideList">' +
+  document.getElementById('qpBody').innerHTML = '<ul class="qpSideList">' +
     tasks.sides.map(keyPointHTML).join('') + '</ul>';
   document.getElementById('questPanel').classList.remove('hidden');
 }
