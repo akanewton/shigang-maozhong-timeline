@@ -270,3 +270,16 @@ window.KEY_SITES.push(
     }
   });
 })();
+
+/* ===== 毛泽东人生轨迹 ===== */
+window.MAO_LIFE = [
+  { year:1893, lon:112.53, lat:27.91, name:'韶山', note:'出生' },
+  { year:1910, lon:112.50, lat:27.75, name:'湘乡', note:'求学' },
+  { year:1913, lon:112.98, lat:28.19, name:'长沙', note:'第一师范' },
+  { year:1921, lon:121.47, lat:31.23, name:'上海', note:'中共一大' },
+  { year:1927, lon:114.17, lat:26.57, name:'井冈山', note:'秋收起义后' },
+  { year:1935, lon:106.92, lat:27.73, name:'遵义', note:'遵义会议' },
+  { year:1935.9, lon:109.49, lat:36.60, name:'延安', note:'陕北' },
+  { year:1948, lon:114.00, lat:38.30, name:'西柏坡', note:'指挥战略决战' },
+  { year:1949, lon:116.40, lat:39.90, name:'北京', note:'开国大典' }
+];
