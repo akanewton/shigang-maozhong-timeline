@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>史纲 · 毛中特 时间轴（v7.32 公开版）</title>
+<title>史纲 · 毛中特 时间轴（v7.33 公开版）</title>
 <style>
   :root{ --bg1:#0a0e13; --bg2:#101823; --text:#e9f0f8; --muted:#8fa2b6; --line:#22303f; --accent:#7cc4ff; }
   *{box-sizing:border-box}
@@ -680,12 +680,58 @@
   }
 </style>
 <style id="map-cursor-style">#mapDrag{cursor:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M3%203%20L19%2019%22%20stroke%3D%22%23071019%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M3%203%20L19%2019%22%20stroke%3D%22%23f2fbff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M19%2019%20L27%2027%22%20stroke%3D%22%23e8b66a%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M3%203%20L8%204.5%20L4.5%208%20Z%22%20fill%3D%22%23eaf6ff%22%20stroke%3D%22%23071019%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%223%22%20cy%3D%223%22%20r%3D%221.6%22%20fill%3D%22%237cc4ff%22%2F%3E%3C%2Fsvg%3E") 3 3, crosshair}#mapDrag.dragging{cursor:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%0A%3Cpath%20d%3D%22M3%203%20L23%2023%22%20stroke%3D%22%23071019%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%2F%3E%0A%3Cpath%20d%3D%22M3%203%20L23%2023%22%20stroke%3D%22%23f2fbff%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%2F%3E%0A%3Cpath%20d%3D%22M23%2023%20L33%2033%22%20stroke%3D%22%23e8b66a%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%2F%3E%0A%3Cpath%20d%3D%22M3%203%20L9%204.8%20L4.8%209%20Z%22%20fill%3D%22%23eaf6ff%22%20stroke%3D%22%23071019%22%20stroke-width%3D%221%22%2F%3E%0A%3Ccircle%20cx%3D%223%22%20cy%3D%223%22%20r%3D%221.8%22%20fill%3D%22%237cc4ff%22%2F%3E%0A%3Cg%20transform%3D%22translate%280%2C20%29%20scale%28.8%29%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%20%3Cg%20stroke%3D%22%23071019%22%20stroke-width%3D%224.2%22%3E%0A%20%20%3Cpath%20d%3D%22M18%2011V6a2%202%200%200%200-4%200v4%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M14%2010V4a2%202%200%200%200-4%200v6%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M10%2010.5V6a2%202%200%200%200-4%200v8%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M18%208a2%202%200%200%201%202%202v6a6%206%200%200%201-6%206h-2a6%206%200%200%201-5-2.7L5.3%2016a2%202%200%200%201%203.4-2l1.3%202%22%2F%3E%0A%20%3C%2Fg%3E%0A%20%3Cg%20stroke%3D%22%23f7fbff%22%20stroke-width%3D%221.8%22%3E%0A%20%20%3Cpath%20d%3D%22M18%2011V6a2%202%200%200%200-4%200v4%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M14%2010V4a2%202%200%200%200-4%200v6%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M10%2010.5V6a2%202%200%200%200-4%200v8%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M18%208a2%202%200%200%201%202%202v6a6%206%200%200%201-6%206h-2a6%206%200%200%201-5-2.7L5.3%2016a2%202%200%200%201%203.4-2l1.3%202%22%2F%3E%0A%20%3C%2Fg%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E") 3 3, crosshair}</style>
+<style id="keypoint-color-style">
+  #questPanel .qpBody{padding:2px 2px 4px}
+  #questPanel .qpSideList{list-style:none;padding-left:0;margin:5px 0 0;display:flex;flex-direction:column;gap:6px}
+  #questPanel .qpSideList li.kp{
+    position:relative;padding:7px 9px 7px 12px;border-left:2px solid #6f8ca8;border-radius:0 7px 7px 0;
+    background:rgba(120,150,180,.055);line-height:1.65;font-size:13.2px;
+  }
+  #questPanel .qpSideList li.kp::before{content:"";position:absolute;left:-5px;top:13px;width:7px;height:7px;border-radius:50%;background:#6f8ca8;box-shadow:0 0 0 3px rgba(111,140,168,.12)}
+  #questPanel .kpTag{
+    display:inline-block;margin:0 7px 2px 0;padding:1px 6px;border-radius:4px;
+    font-family:"Microsoft YaHei",sans-serif;font-size:9.5px;line-height:1.45;letter-spacing:.6px;
+    vertical-align:1px;color:#b8cee2;background:rgba(120,150,180,.12);border:1px solid rgba(140,170,200,.18);
+  }
+  #questPanel .kpText{color:#dbe8f4}
+  #questPanel .kpDate{color:#8fe6ff;font-weight:700;letter-spacing:.2px}
+  /* 颜色记忆系统：背景=蓝，方针=青，结果=绿，意义=金，易错=红，时间/属性=紫 */
+  #questPanel .kp.cause{border-left-color:#69b7ff;background:rgba(80,160,255,.075)}
+  #questPanel .kp.cause::before{background:#69b7ff;box-shadow:0 0 0 3px rgba(105,183,255,.16)}
+  #questPanel .kp.cause .kpTag{color:#b9ddff;background:rgba(80,160,255,.14);border-color:rgba(105,183,255,.28)}
+  #questPanel .kp.policy{border-left-color:#56e0c2;background:rgba(60,220,185,.065)}
+  #questPanel .kp.policy::before{background:#56e0c2;box-shadow:0 0 0 3px rgba(86,224,194,.14)}
+  #questPanel .kp.policy .kpTag{color:#a9f6e6;background:rgba(60,220,185,.13);border-color:rgba(86,224,194,.25)}
+  #questPanel .kp.result{border-left-color:#8bdc91;background:rgba(100,210,110,.065)}
+  #questPanel .kp.result::before{background:#8bdc91;box-shadow:0 0 0 3px rgba(139,220,145,.14)}
+  #questPanel .kp.result .kpTag{color:#c6f4c8;background:rgba(100,210,110,.13);border-color:rgba(139,220,145,.25)}
+  #questPanel .kp.meaning{border-left-color:#ffd166;background:rgba(255,209,102,.08)}
+  #questPanel .kp.meaning::before{background:#ffd166;box-shadow:0 0 0 3px rgba(255,209,102,.15)}
+  #questPanel .kp.meaning .kpTag{color:#ffe8b8;background:rgba(255,209,102,.15);border-color:rgba(255,209,102,.28)}
+  #questPanel .kp.error{border-left-color:#ff8585;background:rgba(255,100,100,.075)}
+  #questPanel .kp.error::before{background:#ff8585;box-shadow:0 0 0 3px rgba(255,133,133,.15)}
+  #questPanel .kp.error .kpTag{color:#ffc2c2;background:rgba(255,100,100,.14);border-color:rgba(255,133,133,.28)}
+  #questPanel .kp.meta{border-left-color:#c4a7ff;background:rgba(170,130,255,.065)}
+  #questPanel .kp.meta::before{background:#c4a7ff;box-shadow:0 0 0 3px rgba(196,167,255,.14)}
+  #questPanel .kp.meta .kpTag{color:#dfd0ff;background:rgba(170,130,255,.13);border-color:rgba(196,167,255,.25)}
+  #questPanel .kpLegend{display:flex;gap:5px;flex-wrap:wrap;margin:0 0 7px;font-family:"Microsoft YaHei",sans-serif}
+  #questPanel .kpLegend span{font-size:9px;line-height:1.4;padding:1px 5px;border-radius:3px;border:1px solid transparent}
+  #questPanel .kpLegend .cause{color:#b9ddff;background:rgba(80,160,255,.12);border-color:rgba(105,183,255,.22)}
+  #questPanel .kpLegend .policy{color:#a9f6e6;background:rgba(60,220,185,.1);border-color:rgba(86,224,194,.2)}
+  #questPanel .kpLegend .result{color:#c6f4c8;background:rgba(100,210,110,.1);border-color:rgba(139,220,145,.2)}
+  #questPanel .kpLegend .meaning{color:#ffe8b8;background:rgba(255,209,102,.12);border-color:rgba(255,209,102,.22)}
+  #questPanel .kpLegend .error{color:#ffc2c2;background:rgba(255,100,100,.1);border-color:rgba(255,133,133,.22)}
+  /* 关键词高亮更醒目 */
+  .hl{color:#ffd76a;font-weight:700;background:linear-gradient(transparent 58%,rgba(255,211,102,.22) 58%);padding:0 1px}
+  .hl2{color:#8fe6ff;font-weight:700;background:linear-gradient(transparent 60%,rgba(105,200,255,.16) 60%);padding:0 1px}
+  .hl3{color:#ff9d9d;font-weight:700;background:linear-gradient(transparent 60%,rgba(255,120,120,.14) 60%);padding:0 1px}
+</style>
 </head>
 <body>
 <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <div id="topLeft">
-  <div id="title">史纲 · 毛中特 时间轴 <small>v7.32 公开版</small></div>
+  <div id="title">史纲 · 毛中特 时间轴 <small>v7.33 公开版</small></div>
   <button id="topToggle">隐藏边栏</button>
   <div id="controls">
     <button id="playBtn" class="pri">▶ 播放</button>
@@ -3121,6 +3167,22 @@ function buildHistoryTasks(ev){
     sides
   };
 }
+function keyPointHTML(x){
+  const s = String(x);
+  const m = s.match(/^(前因|背景|原因|方针|策略|措施|结果|影响|意义|结论|作用|教训|易错|局限|时间|地点|内容|性质|标志|特点|关键词)[：:]\s*/);
+  const tagMap = {
+    '前因':'cause','背景':'cause','原因':'cause',
+    '方针':'policy','策略':'policy','措施':'policy',
+    '结果':'result','影响':'result',
+    '意义':'meaning','结论':'meaning','作用':'meaning',
+    '教训':'error','易错':'error','局限':'error',
+    '时间':'meta','地点':'meta','内容':'meta','性质':'meta','标志':'meta','特点':'meta','关键词':'meta'
+  };
+  let label = '', body = s, cls = 'neutral';
+  if (m){ label = m[1]; body = s.slice(m[0].length); cls = tagMap[label] || 'neutral'; }
+  let text = rich(body).replace(/(\d{4})\s*年/g, '<span class="kpDate">$1年</span>');
+  return '<li class="kp ' + cls + '">' + (label ? '<span class="kpTag">' + label + '</span>' : '') + '<span class="kpText">' + text + '</span></li>';
+}
 function renderQuest(){
   const panel = document.getElementById('questPanel');
   if (!panel) return;
@@ -3133,8 +3195,9 @@ function renderQuest(){
   document.getElementById('qpBackground').innerHTML = rich(tasks.background);
   document.getElementById('qpContradiction').innerHTML = rich(tasks.contradiction);
   document.getElementById('qpTask').innerHTML = rich(tasks.task) + (tasks.mainFromPeriod ? ' <span class="qpPeriodNote">（按时期概括）</span>' : '');
-  document.getElementById('qpBody').innerHTML = '<ul class="qpSideList">' +
-    tasks.sides.map(x => '<li>' + rich(x) + '</li>').join('') + '</ul>';
+  const kpLegend = '<div class="kpLegend"><span class="cause">背景</span><span class="policy">方针</span><span class="result">结果</span><span class="meaning">意义</span><span class="error">易错</span></div>';
+  document.getElementById('qpBody').innerHTML = kpLegend + '<ul class="qpSideList">' +
+    tasks.sides.map(keyPointHTML).join('') + '</ul>';
   document.getElementById('questPanel').classList.remove('hidden');
 }
 function hideQuest(){ const p = document.getElementById('questPanel'); if (p) p.classList.add('hidden'); }
