@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>史纲 · 毛中特 时间轴（v7.30 公开版）</title>
+<title>史纲 · 毛中特 时间轴（v7.31 公开版）</title>
 <style>
   :root{ --bg1:#0a0e13; --bg2:#101823; --text:#e9f0f8; --muted:#8fa2b6; --line:#22303f; --accent:#7cc4ff; }
   *{box-sizing:border-box}
@@ -685,7 +685,7 @@
 <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <div id="topLeft">
-  <div id="title">史纲 · 毛中特 时间轴 <small>v7.30 公开版</small></div>
+  <div id="title">史纲 · 毛中特 时间轴 <small>v7.31 公开版</small></div>
   <button id="topToggle">隐藏边栏</button>
   <div id="controls">
     <button id="playBtn" class="pri">▶ 播放</button>
@@ -905,8 +905,9 @@ const EVENTS = [
   {"id":"e1866fz","year":1866,"era":"up","title":"福州船政局","sign":"洋务派创办的近代造船工业，附设船政学堂，培养海军人才。","links":["e1861"]} ,
   {"id":"e1872zs","year":1872,"era":"up","title":"轮船招商局","sign":"洋务运动民用工业代表，标志“自强”到“求富”的转变。","links":["e1861"]} ,
   {"id":"e1874tw","year":1874,"era":"up","title":"日本侵台","sign":"日本借牡丹社事件侵犯台湾，东南海疆危机显现；清政府赔款了结。","links":["e1864nw"]} ,
+  {"id":"e1875mj","year":1875,"era":"up","title":"马嘉理事件","sign":"英国驻华使馆翻译马嘉理在云南被杀，英国借机迫使清政府签订《烟台条约》。","links":[],"camp":"foreign"} ,
   {"id":"e1876xj","year":1876,"era":"up","title":"左宗棠收复新疆","sign":"“先北后南、缓进急战”，收复新疆大部；1884 年新疆建省。","links":["e1864nw"]} ,
-  {"id":"e1876yt","year":1876,"era":"up","title":"《烟台条约》","sign":"马嘉理事件后英国迫使清政府签订，增开商埠、允许入藏，侵略权益扩大。","links":["e1876xj"]} ,
+  {"id":"e1876yt","year":1876,"era":"up","title":"《烟台条约》","sign":"马嘉理事件后英国迫使清政府签订，增开商埠、允许入藏，侵略权益扩大。","links":["e1875mj"],"camp":"foreign"} ,
   {"id":"e1881yl","year":1881,"era":"up","title":"《伊犁条约》","sign":"收回伊犁九城及特克斯河谷，但仍割让霍尔果斯河以西地区。","links":["e1876xj"]} ,
   {"id":"e1883zf","year":1883,"era":"up","title":"中法战争","sign":"马尾海战、镇南关大捷；中国“不败而败”，法国势力深入西南。","links":["e1881yl"],"camp":"foreign"} ,
   {"id":"e1884xj","year":1884,"era":"up","title":"新疆建省","sign":"左宗棠收复新疆后建省，加强西北边疆管理。","links":["e1876xj"]} ,
@@ -936,7 +937,7 @@ const EVENTS = [
   {"id":"e1927b","year":1927,"era":"mid","title":"南昌起义","sign":"打响武装反抗国民党反动派的第一枪。","links":["e1927a"],"camp":"ccp"} ,
   {"id":"e1927c","year":1927,"era":"mid","title":"八七会议","sign":"确定土地革命和武装反抗国民党反动派的总方针。","links":["e1927b"],"camp":"ccp"} ,
   {"id":"e1927d","year":1927,"era":"mid","title":"井冈山","sign":"开辟“农村包围城市、武装夺取政权”的革命道路。","links":["e1927c"],"camp":"ccp"} ,
-  {"id":"e1928jn","year":1928,"era":"mid","title":"济南惨案","sign":"日军侵占济南，屠杀中国军民，制造“五三惨案”。","links":["e1927d"],"camp":"foreign"} ,
+  {"id":"e1928jn","year":1928,"era":"mid","title":"济南惨案","sign":"日军侵占济南，屠杀中国军民，制造“五三惨案”。","links":["e1927a"],"camp":"foreign"} ,
   {"id":"e1929","year":1929,"era":"mid","title":"古田会议","sign":"思想建党、政治建军原则确立。","links":["e1927d"]} ,
   {"id":"e1931","year":1931,"era":"mid","title":"九一八事变","sign":"局部抗战开始，民族矛盾上升。","links":["e1929"],"camp":"foreign"} ,
   {"id":"e1931sov","year":1931,"era":"mid","title":"中华苏维埃共和国成立","sign":"1931年11月，中华苏维埃共和国临时中央政府在瑞金成立。","links":["e1931"],"camp":"ccp"} ,
@@ -958,7 +959,7 @@ const EVENTS = [
   {"id":"e1938wh","year":1938,"era":"mid","title":"武汉会战","sign":"抗战进入相持阶段的标志性会战；日军速亡中国计划破产。","links":["e1938"],"camp":"kmt"} ,
   {"id":"e1940bg","year":1940,"era":"mid","title":"百团大战","sign":"八路军在华北发动大规模破袭战，打击日军交通线和据点。","links":["e1938wh"],"camp":"ccp"} ,
   {"id":"e1941wj","year":1941,"era":"mid","title":"皖南事变","sign":"国民党顽固派围攻新四军，抗日民族统一战线内部摩擦加剧。","links":["e1940bg"],"camp":"kmt"} ,
-  {"id":"e1941pj","year":1941,"era":"mid","title":"潘家峪惨案","sign":"日军在河北丰润潘家峪屠杀村民千余人，制造惨案。","links":["e1941wj"],"camp":"foreign"} ,
+  {"id":"e1941pj","year":1941,"era":"mid","title":"潘家峪惨案","sign":"日军在河北丰润潘家峪屠杀村民千余人，制造惨案。","links":["e1940bg"],"camp":"foreign"} ,
   {"id":"e1942yz","year":1942,"era":"mid","title":"延安整风","sign":"反对主观主义、宗派主义、党八股，确立实事求是思想路线，为七大作思想准备。","links":["e1938"],"camp":"ccp"} ,
   {"id":"e1942wy","year":1942,"era":"mid","title":"五一大扫荡","sign":"日军对冀中根据地“扫荡”，实行“三光”政策，敌后抗战进入最困难时期。","links":["e1941pj"],"camp":"foreign"} ,
   {"id":"e1943cj","year":1943,"era":"mid","title":"厂窖惨案","sign":"日军在湖南南县厂窖屠杀平民三万余人，制造惨案。","links":["e1942wy"],"camp":"foreign"} ,
@@ -981,7 +982,7 @@ const EVENTS = [
   {"id":"e1958db","year":1958,"era":"d1","title":"大跃进和人民公社化运动","sign":"1958年发动大跃进和人民公社化运动，探索中出现严重失误。","links":["e1956b"],"camp":"ccp"} ,
   {"id":"e1964","year":1964,"era":"d1","title":"第一颗原子弹爆炸成功","sign":"1964年10月16日第一颗原子弹爆炸成功；后来氢弹、人造卫星相继突破，合称“两弹一星”。","links":["e1956b"]} ,
   {"id":"e1966wg","year":1966,"era":"d1","title":"文化大革命","sign":"1966年发动“文化大革命”，给党、国家和各族人民带来严重灾难。","links":["e1958db"],"camp":"ccp"} ,
-  {"id":"e1978","year":1978,"era":"d1","title":"十一届三中全会","sign":"伟大转折：确立解放思想、实事求是，改革开放的开端。","links":["e1956b"]} ,
+  {"id":"e1978","year":1978,"era":"d1","title":"十一届三中全会","sign":"伟大转折：确立解放思想、实事求是，改革开放的开端。","links":["e1966wg"]} ,
   {"id":"e1980","year":1980,"era":"d2","title":"经济特区","sign":"对外开放的窗口，“杀出一条血路”。","links":["e1978"]} ,
   {"id":"e1992","year":1992,"era":"d2","title":"南方谈话","sign":"邓小平南方谈话，强调计划和市场都是手段，推动改革开放再出发。","links":["e1980"]} ,
   {"id":"e1992b","year":1992,"era":"d2","title":"中共十四大","sign":"确立社会主义市场经济体制改革目标，用邓小平建设有中国特色社会主义理论武装全党。","links":["e1992"]} ,
@@ -1062,6 +1063,10 @@ const EVENT_DATE = {
   "e1942yz": [
     2,
     1
+  ],
+  "e1875mj": [
+    2,
+    21
   ],
   "e1881yl": [
     2,
@@ -1764,7 +1769,8 @@ const LOC = {
   e1947td:{"lon": 114.2, "lat": 38.25, "place": "平山"},
   e1949dj:{"lon": 118.8, "lat": 32.06, "place": "南京/长江"},
   e1958db:{"lon": 116.4, "lat": 39.9, "place": "北京"},
-  e1966wg:{"lon": 116.4, "lat": 39.9, "place": "北京"}
+  e1966wg:{"lon": 116.4, "lat": 39.9, "place": "北京"},
+  e1875mj:{"lon": 97.93, "lat": 24.71, "place": "云南盈江"}
 };
 EVENTS.forEach(e => { if (LOC[e.id]) e.loc = LOC[e.id]; });
 MAO_EVENTS.forEach(e => { if (LOC[e.id]) e.loc = LOC[e.id]; });
