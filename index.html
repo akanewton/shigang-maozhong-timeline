@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>史纲 · 毛中特 时间轴（v7.31 公开版）</title>
+<title>史纲 · 毛中特 时间轴（v7.32 公开版）</title>
 <style>
   :root{ --bg1:#0a0e13; --bg2:#101823; --text:#e9f0f8; --muted:#8fa2b6; --line:#22303f; --accent:#7cc4ff; }
   *{box-sizing:border-box}
@@ -685,7 +685,7 @@
 <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <div id="topLeft">
-  <div id="title">史纲 · 毛中特 时间轴 <small>v7.31 公开版</small></div>
+  <div id="title">史纲 · 毛中特 时间轴 <small>v7.32 公开版</small></div>
   <button id="topToggle">隐藏边栏</button>
   <div id="controls">
     <button id="playBtn" class="pri">▶ 播放</button>
@@ -3467,7 +3467,7 @@ if (mapDrag){
       if (hit){
         tip0.innerHTML = '<b>' + esc(hit.name) + '</b><br><span style="font-size:10px;color:#b8cfe4">' + esc(String(hit.year).replace('.5','')) + (hit.note ? ' · ' + esc(hit.note) : '') + '</span>';
         tip0.style.display = 'block'; tip0.style.left = (e.clientX + 14) + 'px'; tip0.style.top = (e.clientY + 14) + 'px';
-        mapDrag.style.cursor = 'pointer';
+        mapDrag.style.cursor = MAP_CURSOR;
         const lk = document.getElementById('siteLink'); if (lk) lk.style.opacity = '0';
         return;
       }
@@ -3516,7 +3516,7 @@ if (mapDrag){
         link.setAttribute('d', 'M ' + hitScreen[0] + ' ' + hitScreen[1] + ' L ' + lx + ' ' + ly);
         link.style.opacity = '.9';
       }
-      mapDrag.style.cursor = 'pointer';
+      mapDrag.style.cursor = MAP_CURSOR;
       return;
     }
     // 路线悬停
@@ -3541,7 +3541,7 @@ if (mapDrag){
         link.setAttribute('d', 'M ' + sp[0] + ' ' + sp[1] + ' L ' + lx + ' ' + ly);
         link.style.opacity = '.9';
       }
-      mapDrag.style.cursor = 'pointer';
+      mapDrag.style.cursor = MAP_CURSOR;
       return;
     }
     if (link) link.style.opacity = '0';
