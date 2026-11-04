@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>史纲 · 毛中特 时间轴（v7.34 公开版）</title>
+<title>史纲 · 毛中特 时间轴（v7.35 公开版）</title>
 <style>
   :root{ --bg1:#0a0e13; --bg2:#101823; --text:#e9f0f8; --muted:#8fa2b6; --line:#22303f; --accent:#7cc4ff; }
   *{box-sizing:border-box}
@@ -769,12 +769,27 @@
   #questPanel .kp.meta .kpText{color:#e6dcff !important}
   #questPanel .kpDate{color:#8fe6ff !important;font-weight:700 !important}
 </style>
+<style id="keypoint-bright-style">
+  #questPanel .qpKeySection{color:#ffd76a !important;font-weight:700 !important;letter-spacing:1.8px !important}
+  #questPanel .qpSideList li.kp{font-size:13.6px !important;line-height:1.78 !important}
+  #questPanel .kpTitle{font-size:11.5px !important;font-weight:800 !important;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+  #questPanel .kpText{color:#eef6ff !important;font-weight:500 !important;text-shadow:0 1px 2px rgba(0,0,0,.28)}
+  #questPanel .kp.neutral::before{background:#ffd166 !important;box-shadow:0 0 0 3px rgba(255,209,102,.16) !important}
+  #questPanel .kp.neutral .kpText{color:#f4f9ff !important}
+  #questPanel .kp.cause .kpText{color:#d9ecff !important}
+  #questPanel .kp.policy .kpText{color:#d8fff9 !important}
+  #questPanel .kp.result .kpText{color:#e5ffe8 !important}
+  #questPanel .kp.meaning .kpText{color:#fff0d2 !important}
+  #questPanel .kp.error .kpText{color:#ffe3e3 !important}
+  #questPanel .kp.meta .kpText{color:#eee5ff !important}
+  #questPanel .kpDate{color:#9ff0ff !important;font-weight:800 !important;background:rgba(105,220,255,.10);padding:0 2px;border-radius:2px}
+</style>
 </head>
 <body>
 <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <div id="topLeft">
-  <div id="title">史纲 · 毛中特 时间轴 <small>v7.34 公开版</small></div>
+  <div id="title">史纲 · 毛中特 时间轴 <small>v7.35 公开版</small></div>
   <button id="topToggle">隐藏边栏</button>
   <div id="controls">
     <button id="playBtn" class="pri">▶ 播放</button>
@@ -918,7 +933,7 @@
   <div id="qpContradiction" class="qpContradiction"></div>
   <div class="qpSection">历史任务</div>
   <div id="qpTask" class="qpTask"></div>
-  <div class="qpSection">关键考点</div>
+  <div class="qpSection qpKeySection">关键考点</div>
   <div id="qpBody" class="qpBody"></div>
 </div>
 <div id="arcLegend">
@@ -3713,7 +3728,8 @@ function rich(s){
     ['主要矛盾','hl'],['根本任务','hl'],['民族独立','hl'],['人民解放','hl'],
     ['中国式现代化','hl'],['中华民族伟大复兴','hl'],['确立','hl'],
     ['失败','hl3'],['局限性','hl3'],['错误','hl3'],['侵略','hl3'],
-    ['社会主义','hl2'],['改革开放','hl2'],['市场经济','hl2'],['统一战线','hl2']
+    ['清政府','hl2'],['日本','hl3'],['赔款','hl3'],['野心','hl3'],['扩张','hl3'],
+    ['主权','hl'],['领土','hl'],['社会主义','hl2'],['改革开放','hl2'],['市场经济','hl2'],['统一战线','hl2']
   ];
   for (const [k,cls] of marks){
     const ek = esc(k);
